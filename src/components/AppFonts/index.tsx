@@ -55,6 +55,17 @@ const AppFonts: FC<Props> = ({onSuccess, onError}) => {
   return <View />;
 };
 
+export const useFontFamily = () => {
+  const fontFamily = useAppSelector(FontSelector());
+  const fonts = useAppSelector(FontsSelector());
+
+  if (Platform.OS === 'ios') {
+    return fontFamily;
+  }
+  let fontWeight = '400';
+  return `${fontFamily}_${fontWeight}`;
+};
+
 export const useFontStyle = (styles?: Array<any>) => {
   const fontFamily = useAppSelector(FontSelector());
   const fonts = useAppSelector(FontsSelector());

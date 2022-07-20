@@ -10,9 +10,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useAppSelector} from '../../hooks/useRedux';
+import {ThemeSelector} from '../../store/Configuration';
 
 // custom
 import {t, f, l, c} from '../../styles/shared';
+import {useColors} from '../../styles/shared/Colors';
 import {useFontStyle} from '../AppFonts';
 import Text from '../Text';
 
@@ -48,6 +51,9 @@ const Input: React.FC<Props> = ({
 }) => {
   const hasError = touched && error;
   const fontStyles = useFontStyle();
+  const appTheme = useAppSelector(ThemeSelector());
+  const colors = useColors();
+
   const clearSearch = () => {
     // @ts-ignore
     rest?.onChangeText('');
@@ -75,6 +81,7 @@ const Input: React.FC<Props> = ({
           styles.wrapper,
           {
             borderColor: hasError ? c.red800 : borderColor,
+            backgroundColor: appTheme === 'light' ? '#f5f5f5' : '#212121',
           },
           widgetStyles?.wrapper,
         ]}>
@@ -83,7 +90,7 @@ const Input: React.FC<Props> = ({
             <Icon
               name={leftIcon.iconName}
               size={20}
-              color={leftIcon.iconColor || c.black400}
+              color={leftIcon.iconColor || colors.black400}
             />
           </View>
         )}
@@ -91,6 +98,7 @@ const Input: React.FC<Props> = ({
           ref={inputRef}
           style={[
             styles.input,
+            {color: colors.black400},
             // @ts-ignore
             fontStyles,
             widgetStyles?.input,
@@ -104,6 +112,7 @@ const Input: React.FC<Props> = ({
             setIsFocused(false);
           }}
           secureTextEntry={secureTextEntry}
+          placeholderTextColor={c.black200}
           {...rest}
         />
         {rightIcon && (
@@ -151,7 +160,7 @@ const styles = StyleSheet.create({
   },
   input: {
     ...t.p,
-    color: c.black400,
+
     ...l.px15,
     flex: 1,
   },

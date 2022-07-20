@@ -1,22 +1,23 @@
 import React, {FC} from 'react';
-import {View} from 'react-native';
+import {View, ScrollView} from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParams, ScreenID} from '../../navigation/types';
 
 // custom
 import Header from '../../components/Header';
-import {ScrollView} from 'react-native-gesture-handler';
 import {l} from '../../styles/shared';
-import {ContainerStyles} from '../../styles/elements';
-import NewsList from '../Dashboard/components/NewsList';
+import {useContainerStyles} from '../../styles/elements';
+import PostsList from '../Dashboard/components/PostsList';
+import Text from '../../components/Text';
 
 interface Props {
   route: RouteProp<RootStackParams, ScreenID.Checkout>;
 }
 
-const AllNews: FC<Props> = ({route: {params = {}}}) => {
+const AllPosts: FC<Props> = ({route: {params = {}}}) => {
   // @ts-ignore
   const {content} = params;
+  const ContainerStyles = useContainerStyles();
 
   return (
     <View style={[ContainerStyles]}>
@@ -25,10 +26,11 @@ const AllNews: FC<Props> = ({route: {params = {}}}) => {
         bounces={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[l.p20]}>
-        <NewsList {...content} ViewType={'AllNews'} />
+        <PostsList {...content} ViewType={'All'} />
+        {/* <Text>hello i am all postsArr</Text> */}
       </ScrollView>
     </View>
   );
 };
 
-export default AllNews;
+export default AllPosts;

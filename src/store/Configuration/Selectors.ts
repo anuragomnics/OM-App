@@ -5,12 +5,12 @@ const selectSelf = (state: RootState) => state;
 
 export const DrawerNavigationSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
-    return state.configuration.navigations.drawer;
+    return state.configuration.navigations;
   });
 
 export const TabsNavigationSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
-    return state.configuration.navigations.bar;
+    return state.configuration.navigations;
   });
 
 export const SelectedNavigationSelector = () =>
@@ -21,24 +21,23 @@ export const SelectedNavigationSelector = () =>
 export const ColorSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
     return {
-      color_accent: state.configuration.logo_color_ci?.color_accent,
+      color_accent:
+        state.configuration.theme === 'dark'
+          ? state.configuration.settings.accent_color_dark_mode
+          : state.configuration.settings.accent_color,
       color_accent_text_color:
-        state.configuration.logo_color_ci?.color_accent_text_color,
-      color_navigation_background:
-        state.configuration.logo_color_ci?.color_navigation_background,
-      color_navigation_text:
-        state.configuration.logo_color_ci?.color_navigation_text,
-      color_error_alert: state.configuration.logo_color_ci?.color_error_alert,
-      color_success_alert:
-        state.configuration.logo_color_ci?.color_success_alert,
-      color_warning_alert:
-        state.configuration.logo_color_ci?.color_warning_alert,
+        state.configuration.theme === 'dark'
+          ? state.configuration.settings.accent_text_color_dark_mode
+          : state.configuration.settings.accent_text_color,
+      color_error_alert: state.configuration.settings?.error_alert,
+      color_success_alert: state.configuration.settings.success_alert,
+      color_warning_alert: state.configuration.settings.warning_alert,
     };
   });
 
 export const FontSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
-    return state.configuration.logo_color_ci?.font_app;
+    return state.configuration.settings?.font;
   });
 
 export const FontsSelector = () =>
@@ -69,4 +68,13 @@ export const CheckoutSettingsSelector = () =>
 export const scheduledRemindersSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
     return state.configuration.scheduledReminders;
+  });
+
+export const ThemeSelector = () =>
+  createDraftSafeSelector(selectSelf, state => {
+    return state.configuration.theme;
+  });
+export const ThemeSetttingTypeSelector = () =>
+  createDraftSafeSelector(selectSelf, state => {
+    return state.configuration.themeSettingType;
   });

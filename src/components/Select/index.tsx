@@ -1,6 +1,5 @@
 import React, {FC, useState} from 'react';
-import {View, StyleSheet, Alert} from 'react-native';
-import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
+import {View, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useBottomAction} from '../../hooks/useBottomAction';
 // styles

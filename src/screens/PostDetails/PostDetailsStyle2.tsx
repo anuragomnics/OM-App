@@ -1,19 +1,14 @@
 import React, {FC, useEffect, useRef, useState} from 'react';
 import {
   View,
-  ImageBackground,
-  TouchableOpacity,
   StyleSheet,
-  StatusBar,
-  Dimensions,
   BackHandler,
+  ScrollView,
+  StatusBar,
   Share,
-  Linking,
-  Alert,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import RNGallery from 'react-native-image-gallery';
 
 // custom
 import TabBar from '../../components/TabBar';
@@ -21,10 +16,9 @@ import Text from '../../components/Text';
 import {RootStackParams, ScreenID} from '../../navigation/types';
 import NavigationService from '../../services/NavigationService';
 import {c, f, l, t} from '../../styles/shared';
-import {BoxTopShadowStyles, ContainerStyles} from '../../styles/elements';
+import {BoxTopShadowStyles, useContainerStyles} from '../../styles/elements';
 import DetailsBannerImage from '../../components/DetailsBannerImage';
-import {ScrollView} from 'react-native-gesture-handler';
-import {useSingleNews} from './hook';
+import {useSinglePost} from './hook';
 import Gallery from '../CourseDetails/Components/Gallery';
 import Authors from '../CourseDetails/Components/Authors';
 import Description from '../CourseDetails/Components/Description';
@@ -33,14 +27,16 @@ import FastImage from 'react-native-fast-image';
 import Button from '../../components/Button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAppSelector} from '../../hooks/useRedux';
-import {FontsSelector} from '../../store/Configuration';
+import {FontsSelector, SettingsSelector} from '../../store/Configuration';
 import moment from 'moment';
 import DeviceHelper from '../../config/DeviceHelper';
 import Header from '../../components/Header';
 import RNFetchBlob from 'rn-fetch-blob';
+import {useColors} from '../../styles/shared/Colors';
+import {PostType} from '../../types/responses/PostsListResponseType';
 
 interface Props {
-  route: RouteProp<RootStackParams, ScreenID.CouseDetails>;
+  post: PostType;
 }
 
 interface TAB {
@@ -63,10 +59,13 @@ const TABS = [
   },
 ];
 
-const FontScales = ['75%', '100%', '125%', '150%'];
+const FontScales = [14, 16, 18, 20, 22];
 
-const NewsDetails: FC<Props> = ({route}) => {
+const PostDetailsStyle2: FC<Props> = ({post}) => {
+  const ContainerStyles = useContainerStyles();
   const primaryColor = usePrimaryStyles().color;
+  const colors = useColors();
+  const settings = useAppSelector(SettingsSelector());
   const fonts = useAppSelector(FontsSelector());
   const normalFont = fonts.filter(font => {
     return font.fontWeight == '300';
@@ -76,31 +75,17 @@ const NewsDetails: FC<Props> = ({route}) => {
     ? normalFont[0].fontURL
     : fonts?.[0]?.fontURL || '';
 
-  // @ts-ignore
-  const {news = {}, fromSlider, fromRelatedNews} = route.params;
-  const {newsDetails, isLoading} = useSingleNews(news.id);
+  // const {post = {}, fromSlider, fromRelatedNews} = route.params;
+  const {postDetails, isLoading} = useSinglePost(post.id);
   const {bottom, top} = useSafeAreaInsets();
 
-  console.log('newsnewsnews', news);
-
-  const title = fromRelatedNews
-    ? news.title
-    : fromSlider
-    ? news?.name
-    : news.title;
-  const newsBannerImage = fromRelatedNews
-    ? news?.thumbnail
-    : fromSlider
-    ? news?.image
-    : news.primary_image;
+  const title = post.title;
+  const postBannerImage =
+    post.post_type === 'image' ? post.post_media_url : post.post_thumbnail_url;
 
   // refs
   const scrollRef = useRef();
 
-  // state
-  // const [selectedNewsID, setSelectedNewsID] = useState<number>(
-  //   newsDetails?.id || -1,
-  // );
   const [fontScaleIndex, setFontScaleIndex] = useState<number>(2);
 
   // navigations
@@ -118,7 +103,7 @@ const NewsDetails: FC<Props> = ({route}) => {
 
   const onRelatedNewsPress = (relatedNews: any) => {
     scrollToTop();
-    NavigationService.pushToScreen(ScreenID.NewsDetails, {
+    NavigationService.pushToScreen(ScreenID.PostDetails, {
       news: relatedNews,
       fromRelatedNews: true,
     });
@@ -152,14 +137,7 @@ const NewsDetails: FC<Props> = ({route}) => {
   const currFontScale = FontScales[fontScaleIndex];
 
   return (
-    <View
-      style={[
-        ContainerStyles,
-        {backgroundColor: '#fff', position: 'relative'},
-      ]}>
-      {/* <StatusBar barStyle={'light-content'} networkActivityIndicatorVisible /> */}
-      {/* <View style={styles.statusBar} /> */}
-
+    <View style={[ContainerStyles]}>
       <Header useBack title={' '} />
 
       <ScrollView
@@ -169,26 +147,33 @@ const NewsDetails: FC<Props> = ({route}) => {
         // @ts-ignore
         ref={scrollRef}>
         <View style={[l.p20]}>
-          {/* Date */}
-          <View style={[l.flexRow, l.alignCtr]}>
-            <Text
-              style={[t.h5, f.fontWeightMedium, l.mb5, {color: c.black200}]}>
-              {news?.available_date || newsDetails?.available_date
-                ? moment(
-                    news?.available_date || newsDetails?.available_date,
-                    'DD.MM.YYYY HH:mm',
-                  ).format('DD.MM.YYYY')
-                : ''}
-            </Text>
-          </View>
-
           {/* title */}
-          <Text style={[t.h2SM, f.fontWeightMedium, {lineHeight: 24}]}>
+          <Text style={[t.h3, f.fontWeightMedium, {lineHeight: 28}]}>
             {title}
           </Text>
 
+          {/* Date */}
+          {settings.posts_general_settings?.posts_details_date_time_format !==
+            'none' && (
+            <View style={[l.flexRow, l.alignCtr, l.mt10]}>
+              <Text style={[f.fontWeightMedium, l.mb5, {color: c.black150}]}>
+                {postDetails?.published_at
+                  ? moment(
+                      postDetails?.published_at,
+                      'YYYY-MM-DD HH:mm:ss',
+                    ).format(
+                      settings.posts_general_settings
+                        ?.posts_details_date_time_format === 'date_time'
+                        ? 'DD.MM.YYYY | HH:mm'
+                        : 'DD.MM.YYYY',
+                    )
+                  : ''}
+              </Text>
+            </View>
+          )}
+
           {/* categories */}
-          {newsDetails?.categories && newsDetails?.categories.length > 0 && (
+          {/* {postDetails?.categories && newsDetails?.categories.length > 0 && (
             <View style={[l.flexRow, l.alignCtr, l.wrap, l.mt5]}>
               {newsDetails?.categories.map((category, index) => {
                 return (
@@ -208,32 +193,25 @@ const NewsDetails: FC<Props> = ({route}) => {
                 );
               })}
             </View>
-          )}
+          )} */}
 
-          <TouchableOpacity
-            style={[l.mt10]}
-            onPress={() => {
-              NavigationService.pushToScreen(ScreenID.FullScreenImage, {
-                imageUrl: newsBannerImage,
-              });
-            }}>
-            <DetailsBannerImage
-              onBackPress={goBack}
-              imageUrl={newsBannerImage}
-              hideBackIcon
-            />
-          </TouchableOpacity>
-          {newsDetails?.copyright_primary_image && (
-            <Text style={[{color: c.black200}]}>
-              {newsDetails?.copyright_primary_image}
+          {/* banner image */}
+          <View style={[l.mt15]}>
+            <DetailsBannerImage post={post} />
+          </View>
+
+          {/* copyright text */}
+          {postDetails?.post_media_copyright_text && (
+            <Text style={[{color: c.black200, textAlign: 'center'}, l.mt5]}>
+              {postDetails?.post_media_copyright_text}
             </Text>
           )}
 
           {/* Details */}
-          {(newsDetails?.description || newsDetails?.introduction) && (
+          {(post?.description || post?.introduction) && (
             <View style={[l.mt15]}>
               <Description
-                newsDetails={newsDetails}
+                postDetails={post}
                 fontSize={currFontScale}
                 fontUrl={fontUrl}
                 scrollToTop={scrollToTop}
@@ -242,21 +220,21 @@ const NewsDetails: FC<Props> = ({route}) => {
           )}
 
           {/* Gallery */}
-          {newsDetails?.gallery && newsDetails?.gallery.length > 0 && (
+          {/* {newsDetails?.gallery && newsDetails?.gallery.length > 0 && (
             <View style={[l.mt15]}>
               <Gallery news={newsDetails} />
             </View>
-          )}
+          )} */}
 
           {/* Authors */}
-          {newsDetails?.authors && newsDetails?.authors.length > 0 && (
+          {/* {newsDetails?.authors && newsDetails?.authors.length > 0 && (
             <View style={[l.mt15]}>
               <Authors news={newsDetails} />
             </View>
-          )}
+          )} */}
 
           {/* related News */}
-          {newsDetails?.related_news && newsDetails?.related_news.length > 0 && (
+          {/* {newsDetails?.related_news && newsDetails?.related_news.length > 0 && (
             <View style={[l.mt15]}>
               <Text style={[t.h5, f.fontWeightMedium]}>{'Related News'}</Text>
               {newsDetails?.related_news.map((relatedNews, index) => {
@@ -276,7 +254,7 @@ const NewsDetails: FC<Props> = ({route}) => {
                 );
               })}
             </View>
-          )}
+          )} */}
         </View>
       </ScrollView>
       <View
@@ -288,7 +266,6 @@ const NewsDetails: FC<Props> = ({route}) => {
           l.py15,
           {
             paddingBottom: bottom + 10,
-            backgroundColor: c.white,
           },
           BoxTopShadowStyles,
         ]}>
@@ -312,33 +289,30 @@ const NewsDetails: FC<Props> = ({route}) => {
           <Icon
             name={'vertical-align-top'}
             size={22}
-            color={c.black800}
+            color={colors.black400}
             style={[l.mr30]}
             onPress={scrollToTop}
           />
-
-          <Icon
-            name={'ios-share'}
-            size={22}
-            color={
-              newsDetails?.share_information?.url ? c.black800 : c.black200
-            }
-            onPress={() => {
-              if (newsDetails?.share_information?.url) {
+          {postDetails?.shareable_post && postDetails.shareable_callback_url ? (
+            <Icon
+              name={'ios-share'}
+              size={22}
+              color={colors.black400}
+              onPress={() => {
                 if (DeviceHelper.isIOS) {
                   Share.share({
-                    message: newsDetails?.share_information?.description || '',
-                    url: newsDetails?.share_information?.url,
+                    message: postDetails?.shareable_description || '',
+                    url: postDetails?.shareable_callback_url || '',
                   });
                 } else {
                   Share.share({
-                    title: newsDetails?.share_information?.description || '',
-                    message: newsDetails?.share_information?.url,
+                    title: postDetails?.shareable_description || '',
+                    message: postDetails?.shareable_callback_url || '',
                   });
                 }
-              }
-            }}
-          />
+              }}
+            />
+          ) : null}
         </View>
       </View>
     </View>
@@ -348,7 +322,7 @@ const NewsDetails: FC<Props> = ({route}) => {
 const styles = StyleSheet.create({
   statusBar: {
     // position: 'absolute',
-    backgroundColor: c.white,
+
     height: 40,
     width: '100%',
     // opacity: 0.5,
@@ -361,4 +335,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewsDetails;
+export default PostDetailsStyle2;

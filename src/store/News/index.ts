@@ -1,11 +1,17 @@
 import {createSlice, PayloadAction, createAction} from '@reduxjs/toolkit';
 
 // custom
-import {fetchAllNews, fetchNews} from './ThunkActions';
+import {fetchAllPosts, fetchPosts} from './ThunkActions';
 import {
   NewsType,
   NewsResponseType,
 } from '../../types/responses/NewsResponsetype';
+import {PostsListSectionType} from '../../types/responses/SettingResponseType';
+import {
+  PaginationDetailsType,
+  PostsListResponseType,
+  PostType,
+} from '../../types/responses/PostsListResponseType';
 
 export interface NewsList {
   data: NewsType[];
@@ -14,21 +20,31 @@ export interface NewsList {
   id?: number;
 }
 
-interface NewsListObj {
-  [key: string]: NewsList;
+interface PostListObj {
+  [key: string]: PostType[];
+}
+interface PostListPaginationObj {
+  [key: string]: PaginationDetailsType;
 }
 
 interface Store {
-  newsList: NewsListObj;
-  allNewsList: NewsList | {};
+  postsList: PostListObj;
+  postsPaginationDetails: PostListPaginationObj;
+  allPosts: PostType[];
+  VideoPlayerContent: PostType | undefined;
 }
 
 const initialState: Store = {
-  newsList: {},
-  allNewsList: {},
+  postsList: {},
+  postsPaginationDetails: {},
+  allPosts: [],
+  VideoPlayerContent: undefined,
 };
 
 export const resetNewsList = createAction('reset-news-list');
+
+export const openVideoPlayer = createAction<PostType>('open-video-player');
+export const closeVideoPlayer = createAction('close-video-player');
 
 const NewsSlice = createSlice({
   name: 'NEWS_SLICE',
@@ -37,29 +53,27 @@ const NewsSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(resetNewsList, () => initialState);
     builder.addCase(
-      fetchAllNews.fulfilled,
-      (state, action: PayloadAction<NewsResponseType>) => {
+      fetchAllPosts.fulfilled,
+      (state, action: PayloadAction<PostsListResponseType>) => {
         //@ts-ignore
-        state.allNewsList = {
-          data: action.payload.data,
-          has_more: action.payload.has_more,
-          total: action.payload.total,
-        };
+        state.allPosts = action.payload.postDetails;
       },
     );
     builder.addCase(
-      fetchNews.fulfilled,
-      (state, action: PayloadAction<NewsResponseType>) => {
+      fetchPosts.fulfilled,
+      (state, action: PayloadAction<PostsListResponseType>) => {
         //@ts-ignore
         const ID = action?.meta?.arg?.id;
-        state.newsList[ID] = {
-          data: action.payload.data,
-          has_more: action.payload.has_more,
-          total: action.payload.total,
-          id: ID,
-        };
+        state.postsList[ID] = action.payload.postDetails;
+        state.postsPaginationDetails[ID] = action.payload.paginationDetails;
       },
     );
+    builder.addCase(openVideoPlayer, (state, action) => {
+      state.VideoPlayerContent = action.payload;
+    });
+    builder.addCase(closeVideoPlayer, (state, action) => {
+      state.VideoPlayerContent = undefined;
+    });
   },
 });
 

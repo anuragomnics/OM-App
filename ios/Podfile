@@ -1,7 +1,7 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+platform :ios, '11.0'
 
 target 'niedersachsischerlandkreistag' do
   config = use_native_modules!
@@ -16,6 +16,7 @@ target 'niedersachsischerlandkreistag' do
   pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
   pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
   pod 'Permission-PhotoLibraryAddOnly', :path => "#{permissions_path}/PhotoLibraryAddOnly"
+  pod 'Permission-Calendars', :path => "#{permissions_path}/Calendars"
 
 
   target 'niedersachsischerlandkreistagTests' do

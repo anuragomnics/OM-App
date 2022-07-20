@@ -23,4 +23,5 @@ export default {
   platform: isIOS ? 'iOS' : 'Android',
   appVersion: `${DeviceInfo.getVersion()}`,
   deviceId: DeviceInfo.getDeviceId(),
+  OS: Platform.OS,
 };

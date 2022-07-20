@@ -1,14 +1,21 @@
 import React, {ReactElement} from 'react';
-import {View, Image, StyleSheet} from 'react-native';
+import {View, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BoxShadowStyles} from '../../styles/elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-// styles
-import {t, f, l, c} from '../../styles/shared';
+
+// images
+import BackIcon from '../../assets/images/back.png';
+import BackWhiteIcon from '../../assets/images/backWhite.png';
+
 // custom
 import Text from '../../components/Text';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import NavigationService from '../../services/NavigationService';
+import {t, f, l} from '../../styles/shared';
+import {useAppSelector} from '../../hooks/useRedux';
+import {SettingsSelector, ThemeSelector} from '../../store/Configuration';
+import {useColors} from '../../styles/shared/Colors';
+import FastImage from 'react-native-fast-image';
 
 interface Props {
   title?: string;
@@ -20,6 +27,7 @@ interface Props {
   leftIcon?: {iconName: string; iconColor?: string};
   onRightIconPress?: () => void;
   onBackPress?: () => void;
+  defaultPageLogo?: boolean;
 }
 
 const IconSize = 25;
@@ -28,12 +36,18 @@ const Header: React.FC<Props> = ({
   title,
   useLogo,
   useBack,
+  onBackPress,
   useDrawer,
   leftIcon,
   onLeftIconPress,
   rightIcon,
   onRightIconPress,
+  defaultPageLogo,
 }) => {
+  const appTheme = useAppSelector(ThemeSelector());
+  const colors = useColors();
+  const settings = useAppSelector(SettingsSelector());
+
   const {top} = useSafeAreaInsets();
   const goBack = () => {
     NavigationService.goBack();
@@ -43,31 +57,37 @@ const Header: React.FC<Props> = ({
     NavigationService.openDrawer();
   };
 
-  const renderLeft = () => {
-    if (useDrawer) {
-      return (
-        <TouchableOpacity
-          style={[styles.backContainer, l.pr5]}
-          onPress={openDrawer}
-          activeOpacity={0.7}>
-          <Icon size={IconSize} color={c.black400} name={'menu'} />
-        </TouchableOpacity>
-      );
-    }
+  const defaultPage_image_url =
+    appTheme === 'dark'
+      ? settings.main_logo_monochrome_url
+      : settings.main_logo_url;
 
+  const renderLeft = () => {
     if (useBack) {
       return (
         <TouchableOpacity
           style={[styles.backContainer]}
-          onPress={goBack}
+          onPress={() => {
+            onBackPress ? onBackPress?.() : goBack();
+          }}
           activeOpacity={0.7}>
-          <Icon
-            size={IconSize}
-            color={c.black400}
-            // name={'keyboard-backspace'}
-            name={'arrow-back-ios'}
+          <Image
+            source={appTheme === 'light' ? BackIcon : BackWhiteIcon}
+            style={styles.backIcon}
           />
         </TouchableOpacity>
+      );
+    }
+
+    if (defaultPageLogo) {
+      return (
+        <View style={[l.flexRow, l.alignCtr]}>
+          <FastImage
+            source={{uri: defaultPage_image_url || ''}}
+            style={styles.headerLogoImg}
+            // resizeMode={FastImage.resizeMode.cover}
+          />
+        </View>
       );
     }
 
@@ -86,17 +106,44 @@ const Header: React.FC<Props> = ({
       );
     }
 
-    return <View style={{width: IconSize}} />;
+    // return <View style={{width: IconSize}} />;
+  };
+
+  const renderRight = () => {
+    if (useDrawer) {
+      return (
+        <TouchableOpacity style={[{}]} onPress={openDrawer} activeOpacity={0.7}>
+          <Icon size={IconSize} color={colors.black400} name={'menu'} />
+        </TouchableOpacity>
+      );
+    }
+
+    if (rightIcon) {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            onRightIconPress?.();
+          }}>
+          <Icon
+            size={IconSize}
+            name={rightIcon.iconName}
+            color={rightIcon.iconColor}
+          />
+        </TouchableOpacity>
+      );
+    }
   };
 
   return (
     <View
       style={[
         styles.container,
-        BoxShadowStyles,
+        // BoxShadowStyles,
         {
-          paddingTop: useLogo ? top : top + 10,
-          paddingBottom: useLogo ? 0 : 10,
+          paddingTop: useLogo ? top : top + 20,
+          paddingBottom: useLogo ? 5 : 20,
+          borderBottomColor:
+            appTheme === 'light' ? colors.grey400 : colors.grey1000,
         },
       ]}>
       {renderLeft()}
@@ -110,13 +157,16 @@ const Header: React.FC<Props> = ({
           />
         )}
 
-        {title ? (
+        {title && !defaultPageLogo ? (
           <Text style={styles.title} numberOfLines={1}>
             {title}
           </Text>
         ) : null}
       </View>
-      {rightIcon && (
+
+      {renderRight()}
+
+      {/* {rightIcon && (
         <TouchableOpacity
           onPress={() => {
             onRightIconPress?.();
@@ -127,23 +177,29 @@ const Header: React.FC<Props> = ({
             color={rightIcon.iconColor}
           />
         </TouchableOpacity>
-      )}
-      {!rightIcon && <View style={{width: IconSize}} />}
+      )} */}
+      {/* {!rightIcon && <View style={{width: IconSize}} />} */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: c.white,
     ...l.px20,
-    ...l.pb15,
+    ...l.pb20,
     ...l.flexRow,
     ...l.alignCtr,
     minHeight: 80,
+    borderBottomWidth: 0.5,
   },
   backContainer: {
-    width: IconSize + 5,
+    width: IconSize + 10,
+    ...l.py5,
+    // borderWidth: 1,
+  },
+  backIcon: {
+    width: 25,
+    height: 15,
   },
   headerLogoContainer: {
     flex: 1,
@@ -152,14 +208,14 @@ const styles = StyleSheet.create({
   headerLogoImg: {
     height: 40,
     width: 120,
-    ...l.mb5,
+    // ...l.mb5,
   },
   title: {
-    ...t.h4,
-    ...f.fontWeightBold,
+    ...t.h3,
+    ...f.fontWeightMedium,
     ...l.fullWidth,
-    textAlign: 'center',
-    ...l.mx5,
+    ...l.mx10,
+    ...l.ml20,
   },
 });
 

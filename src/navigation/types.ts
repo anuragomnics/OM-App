@@ -1,4 +1,5 @@
 import {CheckoutRouteParams} from '../types/request';
+import {PostType} from '../types/responses/PostsListResponseType';
 
 export enum ScreenID {
   Onboarding = 'Onboarding',
@@ -10,19 +11,20 @@ export enum ScreenID {
   ChangePassword = 'ChangePassword',
   Dashboard = 'Dashboard',
   Main = 'Main',
-  LawTextDetail = 'LawTextDetail',
+  LegalTextDetail = 'LegalTextDetail',
   CouseDetails = 'CouseDetails',
   AllCourses = 'AllCourses',
-  NewsDetails = 'NewsDetails',
-  AllNews = 'AllNews',
+  PostDetails = 'PostDetails',
+  AllPosts = 'AllPosts',
   EventDetails = 'EventDetails',
   AllEvents = 'AllEvents',
-  CourseVideoPlayer = 'CourseVideoPlayer',
+  VideoPlayer = 'VideoPlayer',
   Profile = 'Profile',
   SetNewPassword = 'SetNewPassword',
   AppSearch = 'AppSearch',
   Reminders = 'Reminders',
   FullScreenImage = 'FullScreenImage',
+  Settings = 'Settings',
 }
 
 export type RootStackParams = {
@@ -35,17 +37,18 @@ export type RootStackParams = {
   [ScreenID.ChangePassword]: undefined;
   [ScreenID.Dashboard]: undefined;
   [ScreenID.Main]: undefined;
-  [ScreenID.LawTextDetail]: undefined;
+  [ScreenID.LegalTextDetail]: undefined;
   [ScreenID.CouseDetails]: undefined;
   [ScreenID.AllCourses]: undefined;
-  [ScreenID.AllNews]: undefined;
+  [ScreenID.AllPosts]: undefined;
   [ScreenID.EventDetails]: undefined;
   [ScreenID.AllEvents]: undefined;
-  [ScreenID.CourseVideoPlayer]: undefined;
-  [ScreenID.NewsDetails]: undefined;
+  [ScreenID.VideoPlayer]: {post: PostType};
+  [ScreenID.PostDetails]: undefined;
   [ScreenID.Profile]: undefined;
   [ScreenID.SetNewPassword]: undefined;
   [ScreenID.AppSearch]: undefined;
   [ScreenID.Reminders]: undefined;
   [ScreenID.FullScreenImage]: undefined;
+  [ScreenID.Settings]: undefined;
 };

@@ -9,17 +9,32 @@ import {
   SettingResponseType,
   DashboardSettingResponseType,
 } from '../types/responses/SettingResponseType';
+import {NavigationsResponseType} from '../types/responses/NavigationsResponseType';
 import HttpService from './HttpService';
 import RobotoFontBlobData from '../config/RobotoFontBlobData';
-import {Alert} from 'react-native';
+import {Alert, Platform} from 'react-native';
+import HttpServiceNew from './HttpServiceNew';
+import DeviceHelper from '../config/DeviceHelper';
 
 const fetchAppSettings = async () => {
   return await HttpService.Get<SettingResponseType>('/web-and-app/setting');
 };
 
+const fetchAppSettingsNew = async () => {
+  return await HttpServiceNew.Get<SettingResponseType>(
+    `/websiteApp/generalSettings?channel=${DeviceHelper.OS}`,
+  );
+};
+
+const fetchAppNavigations = async () => {
+  return await HttpServiceNew.Get<NavigationsResponseType>(
+    `/websiteApp/navigationMenu?channel=app`,
+  );
+};
+
 const fetchDashboardSettings = async (id: number) => {
   return await HttpService.Get<DashboardSettingResponseType>(
-    `/web-and-app/site/${id}`,
+    `/websiteApp/pageSettings/${id}`,
   );
 };
 
@@ -88,6 +103,8 @@ const ConfigurationService = {
   fetchAppSettings,
   fetchLoadAppFonts,
   fetchDashboardSettings,
+  fetchAppSettingsNew,
+  fetchAppNavigations,
 };
 
 export default ConfigurationService;

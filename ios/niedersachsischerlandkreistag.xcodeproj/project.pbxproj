@@ -15,6 +15,7 @@
 		23741F1727DFA83A002E6F26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 23741F1627DFA83A002E6F26 /* main.m */; };
 		2381E9CE27DFA5A9000FE042 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2381E9CD27DFA5A9000FE042 /* GoogleService-Info.plist */; };
 		23DCE33E2670D05A0078AA08 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		23F06D9828644D7C000181D7 /* dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F06D9728644D7C000181D7 /* dummy.swift */; };
 		38A86D76A64C4999BE9A0004 /* Roboto-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 84F8E53C65E14ED9A08F2936 /* Roboto-Black.ttf */; };
 		47DEEC9A11124CF5AE9FFD50 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C4B6C54EB03147AA84B0E5EC /* Roboto-Regular.ttf */; };
 		4D8E5EECB27548639EEF4CA0 /* Roboto-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1057F7D63D05406694CD67BC /* Roboto-BoldItalic.ttf */; };
@@ -53,7 +54,7 @@
 		2329C3F12673A49D008BACA6 /* BootSplash.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = BootSplash.storyboard; path = niedersachsischerlandkreistag/BootSplash.storyboard; sourceTree = "<group>"; };
 		235C0E9026739E6C006A37DA /* bootsplash_logo@4x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "bootsplash_logo@4x.png"; path = "../src/assets/images/bootsplash_logo@4x.png"; sourceTree = "<group>"; };
 		23741F1627DFA83A002E6F26 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = niedersachsischerlandkreistag/main.m; sourceTree = "<group>"; };
-		2381E9CD27DFA5A9000FE042 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		2381E9CD27DFA5A9000FE042 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "./GoogleService-Info.plist"; sourceTree = "<group>"; };
 		23A45B69276C842F00247526 /* niedersachsischerlandkreistagDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = niedersachsischerlandkreistagDebug.entitlements; path = niedersachsischerlandkreistag/niedersachsischerlandkreistagDebug.entitlements; sourceTree = "<group>"; };
 		23A45B6B2773548900247526 /* niedersachsischerlandkreistagRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = niedersachsischerlandkreistagRelease.entitlements; path = niedersachsischerlandkreistag/niedersachsischerlandkreistagRelease.entitlements; sourceTree = "<group>"; };
 		23A5FA8B2670CF160016A66B /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fonts; path = "../node_modules/react-native-vector-icons/Fonts"; sourceTree = "<group>"; };
@@ -73,6 +74,8 @@
 		23A5FA9A2670CFDB0016A66B /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		23A5FA9B2670CFDB0016A66B /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		23A5FA9C2670CFDB0016A66B /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
+		23F06D9628644D7B000181D7 /* niedersachsischerlandkreistag-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "niedersachsischerlandkreistag-Bridging-Header.h"; sourceTree = "<group>"; };
+		23F06D9728644D7C000181D7 /* dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dummy.swift; sourceTree = "<group>"; };
 		343CD2783CD44D0499D86377 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Bold.ttf"; path = "../src/assets/fonts/Roboto-Bold.ttf"; sourceTree = "<group>"; };
 		4B59B7C7592A4C82AD69137F /* Roboto-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-BlackItalic.ttf"; path = "../src/assets/fonts/Roboto-BlackItalic.ttf"; sourceTree = "<group>"; };
 		4F5E27C43F494319A5E17952 /* Roboto-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-LightItalic.ttf"; path = "../src/assets/fonts/Roboto-LightItalic.ttf"; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				23F06D9728644D7C000181D7 /* dummy.swift */,
 				23A5FA8F2670CFDB0016A66B /* AntDesign.ttf */,
 				23A5FA922670CFDB0016A66B /* Entypo.ttf */,
 				23A5FA902670CFDB0016A66B /* EvilIcons.ttf */,
@@ -190,6 +194,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				90D3B80E36C2C79C12D66BA4 /* Pods */,
 				C0BDD01457154142B56511F9 /* Resources */,
+				23F06D9628644D7B000181D7 /* niedersachsischerlandkreistag-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -293,7 +298,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1340;
 					};
 				};
 			};
@@ -524,6 +529,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				23741F1727DFA83A002E6F26 /* main.m in Sources */,
+				23F06D9828644D7C000181D7 /* dummy.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -543,6 +549,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D00EA23720E73E401ADE6EC7 /* Pods-niedersachsischerlandkreistag-niedersachsischerlandkreistagTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -570,6 +577,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C8CC3ADB6E6E30E80F65CE83 /* Pods-niedersachsischerlandkreistag-niedersachsischerlandkreistagTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = niedersachsischerlandkreistagTests/Info.plist;
@@ -607,7 +615,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -616,6 +624,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = de.nlt.app;
 				PRODUCT_NAME = niedersachsischerlandkreistag;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "niedersachsischerlandkreistag-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -640,7 +649,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -650,6 +659,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=*]" = de.nlt.app;
 				PRODUCT_NAME = niedersachsischerlandkreistag;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "niedersachsischerlandkreistag-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -689,6 +699,7 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -705,7 +716,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -763,7 +774,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",

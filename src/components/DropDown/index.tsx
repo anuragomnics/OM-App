@@ -14,10 +14,13 @@ import Text from '../Text';
 import {BoxShadowStyles} from '../../styles/elements';
 import {c, f, l} from '../../styles/shared';
 import {usePrimaryStyles} from '../../hooks/useThemeStyles';
+import {useAppSelector} from '../../hooks/useRedux';
+import {ThemeSelector} from '../../store/Configuration';
 
 interface Item {
   name: string;
-  value: number;
+  value: string;
+  id: number;
 }
 interface Props {
   items: Array<Item>;
@@ -27,6 +30,8 @@ interface Props {
 
 const DropDown: FC<Props> = ({items = [], onSelectItem, defaultIndex}) => {
   const {color} = usePrimaryStyles();
+  const appTheme = useAppSelector(ThemeSelector());
+
   const [selectedIndex, setSelectedIndex] = useState(defaultIndex);
   const [dropDownWidth, setDropDownWidth] = useState(250);
   //   let dropDownWidth = 250;
@@ -49,11 +54,14 @@ const DropDown: FC<Props> = ({items = [], onSelectItem, defaultIndex}) => {
         saveScrollPosition={false}
         options={items}
         defaultIndex={defaultIndex}
-        dropdownTextHighlightStyle={{backgroundColor: 'red'}}
+        dropdownTextHighlightStyle={{backgroundColor: color}}
         // @ts-ignore
         renderRow={(option, index, isSelected) => {
           return (
-            <View style={{backgroundColor: c.white}}>
+            <View
+              style={{
+                backgroundColor: appTheme === 'light' ? '#f5f5f5' : '#212121',
+              }}>
               <Text
                 key={index}
                 style={[
@@ -71,7 +79,11 @@ const DropDown: FC<Props> = ({items = [], onSelectItem, defaultIndex}) => {
           onSelectItem(items[selectedIndex]);
           setSelectedIndex(selectedIndex);
         }}>
-        <View style={styles.dropdown}>
+        <View
+          style={[
+            styles.dropdown,
+            {backgroundColor: appTheme === 'light' ? '#f5f5f5' : '#212121'},
+          ]}>
           <View style={[l.flexRow, l.alignCtr]}>
             <Text style={[l.flex]}>{items[selectedIndex]?.name}</Text>
             <Icon name={'arrow-drop-down'} size={20} />
@@ -91,11 +103,10 @@ const styles = StyleSheet.create({
     borderColor: '#a8afb5',
     height: 50,
     ...l.px15,
-    backgroundColor: c.white,
   },
   dropdownItemsContainer: {
     position: 'absolute',
-    backgroundColor: c.white,
+
     width: '100%',
     top: 50,
     ...BoxShadowStyles,

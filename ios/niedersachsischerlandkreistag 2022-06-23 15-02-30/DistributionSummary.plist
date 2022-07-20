@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>niedersachsischerlandkreistag.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>89FFB4F81908C21FF153C92EC933C94C7DE299AC</string>
+				<key>dateExpires</key>
+				<string>21/01/23</string>
+				<key>type</key>
+				<string>Apple Distribution</string>
+			</dict>
+			<key>embeddedBinaries</key>
+			<array>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>89FFB4F81908C21FF153C92EC933C94C7DE299AC</string>
+						<key>dateExpires</key>
+						<string>21/01/23</string>
+						<key>type</key>
+						<string>Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>OpenSSL.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>NRJM26B47B</string>
+						<key>name</key>
+						<string>Niedersaechsischer Landkreistag e. V.</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.1.180</string>
+				</dict>
+			</array>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>NRJM26B47B.de.nlt.app</string>
+				<key>aps-environment</key>
+				<string>production</string>
+				<key>com.apple.developer.team-identifier</key>
+				<string>NRJM26B47B</string>
+				<key>get-task-allow</key>
+				<false/>
+			</dict>
+			<key>name</key>
+			<string>niedersachsischerlandkreistag.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>2df90495-f6e4-4377-9551-8d19c9b17c78</string>
+				<key>dateExpires</key>
+				<string>23/06/23</string>
+				<key>name</key>
+				<string>iOS Team Ad Hoc Provisioning Profile: de.nlt.app</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>NRJM26B47B</string>
+				<key>name</key>
+				<string>Niedersaechsischer Landkreistag e. V.</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.4</string>
+		</dict>
+	</array>
+</dict>
+</plist>

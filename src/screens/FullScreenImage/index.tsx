@@ -8,22 +8,22 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Header from '../../components/Header';
 import Text from '../../components/Text';
 import {RootStackParams, ScreenID} from '../../navigation/types';
-import {ContainerStyles} from '../../styles/elements';
+import {useContainerStyles} from '../../styles/elements';
 
 interface Props {
   route: RouteProp<RootStackParams, ScreenID.FullScreenImage>;
 }
 
 const FullScreenImage: FC<Props> = ({route}) => {
-  const {bottom, top} = useSafeAreaInsets(); // @ts-ignore
+  const {bottom, top} = useSafeAreaInsets();
+  const ContainerStyles = useContainerStyles();
+  // @ts-ignore
   const {imageUrl = ''} = route.params;
-  console.log('imageUrlimageUrlimageUrl', imageUrl);
   return (
     <View style={[ContainerStyles]}>
       <View
         style={[
           {
-            backgroundColor: 'white',
             position: 'absolute',
             zIndex: 9,
             width: '100%',
@@ -31,7 +31,7 @@ const FullScreenImage: FC<Props> = ({route}) => {
           },
         ]}>
         <View style={{zIndex: 999}}>
-          <Header useBack title={' '} />
+          <Header useBack />
         </View>
         <RNGallery
           scrollViewStyle={

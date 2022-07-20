@@ -1,17 +1,18 @@
 import {useEffect, useState} from 'react';
-import NewsService from '../../../services/NewsService';
+import NewsService from '../../../services/PostsService';
+import {PostType} from '../../../types/responses/PostsListResponseType';
 import {SingleNewsType} from '../../../types/responses/SingleNewsResposeType';
 
-export const useSingleNews = (id: number) => {
-  const [news, setNews] = useState<SingleNewsType | undefined>(undefined);
+export const useSinglePost = (id: number) => {
+  const [post, setPost] = useState<PostType | undefined>(undefined);
   let isLoading: boolean = false;
 
   useEffect(() => {
     isLoading = true;
     async function fetchData() {
       try {
-        const {data} = await NewsService.fetchSingleNews(id);
-        setNews(data);
+        const {postDetails} = await NewsService.fetchSinglePost(id);
+        setPost(postDetails);
         isLoading = false;
       } catch (error) {
         isLoading = false;
@@ -25,6 +26,6 @@ export const useSingleNews = (id: number) => {
 
   return {
     isLoading,
-    newsDetails: news,
+    postDetails: post,
   };
 };

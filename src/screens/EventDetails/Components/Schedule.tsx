@@ -31,9 +31,7 @@ const Schedule: FC<Props> = ({event}) => {
       startDate: new Date(item.start_at).toISOString(),
       endDate: new Date(item.end_at).toISOString(),
     })
-      .then(eventInfo => {
-        console.log(JSON.stringify(eventInfo));
-      })
+      .then(eventInfo => {})
       .catch((error: string) => {
         // handle error such as when user rejected permissions
         console.log('err', error);

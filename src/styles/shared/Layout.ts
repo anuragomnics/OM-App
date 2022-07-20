@@ -116,6 +116,7 @@ export const layout = {
   mr20: {marginRight: 20},
   mt20: {marginTop: 20},
   mb20: {marginBottom: 20},
+  mb25: {marginBottom: 25},
   mx20: {marginHorizontal: 20},
   my20: {marginVertical: 20},
   p20: {padding: 20},

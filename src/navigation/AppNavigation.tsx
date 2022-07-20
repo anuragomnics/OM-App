@@ -16,15 +16,16 @@ import {useAppDispatch, useAppSelector} from '../hooks/useRedux';
 import {SettingsSelector, onBoardingSelector} from '../store/Configuration';
 import DrawerNavigation from './DrawerNavigation';
 import TabNavigation from './BottomTabsNavigation';
-import LawTextDetail from '../screens/LawTextDetail';
+import LegalTextDetail from '../screens/LegalTextDetail';
 import {IsAuthSelector} from '../store/Auth';
 import CourseDetails from '../screens/CourseDetails';
 import AllCourses from '../screens/AllCourses';
-import AllNews from '../screens/AllNews';
+import AllPosts from '../screens/AllPosts';
 import AllEvents from '../screens/AllEvents';
-import CourseVideoPlayer from '../screens/CourseVideoPlayer';
+import VideoPlayerModal from '../components/VideoPlayerModal';
 import EventDetails from '../screens/EventDetails';
-import NewsDetails from '../screens/NewsDetails';
+import PostDetails from '../screens/PostDetails';
+import PostDetailsStyle2 from '../screens/PostDetails/PostDetailsStyle2';
 import Profile from '../screens/Profile';
 import SetNewPassword from '../screens/SetNewPassword';
 import DeviceHelper from '../config/DeviceHelper';
@@ -33,6 +34,7 @@ import {Alert, View} from 'react-native';
 import AppSearch from '../screens/AppSearch';
 import Reminders from '../screens/Reminders';
 import FullScreenImage from '../screens/FullScreenImage';
+import Settings from '../screens/Settings';
 
 const Stack = createStackNavigator<RootStackParams>();
 
@@ -75,13 +77,14 @@ const AppNavigation = () => {
   // });
 
   const getInitialRouteName = () => {
-    if (isAuth || !settings?.sign_in || hasSubscription) {
-      return ScreenID.Main;
-    }
-    if (onBoarding?.enabled) {
-      return ScreenID.Onboarding;
-    }
-    return ScreenID.Login;
+    // if (isAuth || !settings?.sign_in || hasSubscription) {
+    //   return ScreenID.Main;
+    // }
+    // if (onBoarding?.enabled) {
+    //   return ScreenID.Onboarding;
+    // }
+    // return ScreenID.Login;
+    return ScreenID.Main;
   };
 
   const createAppNavigations = () => {
@@ -97,8 +100,8 @@ const AppNavigation = () => {
             <Stack.Screen name={ScreenID.Register} component={Register} />
             <Stack.Screen name={ScreenID.Checkout} component={Checkout} />
             <Stack.Screen
-              name={ScreenID.LawTextDetail}
-              component={LawTextDetail}
+              name={ScreenID.LegalTextDetail}
+              component={LegalTextDetail}
             />
             <Stack.Screen
               name={ScreenID.ForgotPassword}
@@ -116,8 +119,8 @@ const AppNavigation = () => {
               component={CourseDetails}
             />
             <Stack.Screen name={ScreenID.AllCourses} component={AllCourses} />
-            <Stack.Screen name={ScreenID.NewsDetails} component={NewsDetails} />
-            <Stack.Screen name={ScreenID.AllNews} component={AllNews} />
+            <Stack.Screen name={ScreenID.PostDetails} component={PostDetails} />
+            <Stack.Screen name={ScreenID.AllPosts} component={AllPosts} />
             <Stack.Screen
               name={ScreenID.EventDetails}
               component={EventDetails}
@@ -135,11 +138,12 @@ const AppNavigation = () => {
             />
 
             <Stack.Screen
-              name={ScreenID.CourseVideoPlayer}
-              component={CourseVideoPlayer}
+              name={ScreenID.VideoPlayer}
+              component={VideoPlayerModal}
             />
             <Stack.Screen name={ScreenID.AppSearch} component={AppSearch} />
             <Stack.Screen name={ScreenID.Reminders} component={Reminders} />
+            <Stack.Screen name={ScreenID.Settings} component={Settings} />
           </Stack.Navigator>
         </NavigationContainer>
       );

@@ -13,6 +13,7 @@ import {
   DrawerNavigationSelector,
   setSelectedNavigation,
   SelectedNavigationSelector,
+  ThemeSelector,
 } from '../store/Configuration';
 import FastImage from 'react-native-fast-image';
 import {l, t, c, f} from '../styles/shared';
@@ -30,25 +31,27 @@ import {BoxShadowStyles} from '../styles/elements';
 import {openLink} from '../components/Browser';
 import NavigationService from '../services/NavigationService';
 import {ScreenID} from './types';
+import {NavigationType} from '../types/responses/NavigationsResponseType';
+import {useColors} from '../styles/shared/Colors';
 
 const Tab = createBottomTabNavigator();
 
 const getHighlightedDrawerNavigations = (
-  drawerNavigations: DrawerNavigation[],
+  drawerNavigations: NavigationType[],
 ) => {
-  let navigations: DrawerNavigation[] = [];
+  let navigations: NavigationType[] = [];
   drawerNavigations.map((nav1, i) => {
-    if (nav1.name_highlight_in_app) {
+    if (nav1.page_highlight_app) {
       navigations.push(nav1);
     }
     if (nav1.children) {
       nav1.children.map(nav2 => {
-        if (nav2.name_highlight_in_app) {
+        if (nav2.page_highlight_app) {
           navigations.push(nav2);
         }
         if (nav2.children) {
           nav2.children.map(nav3 => {
-            if (nav3.name_highlight_in_app) {
+            if (nav3.page_highlight_app) {
               navigations.push(nav3);
             }
           });
@@ -61,17 +64,17 @@ const getHighlightedDrawerNavigations = (
 };
 
 interface MyTabBarProps {
-  tabNavigations: DrawerNavigation[];
+  tabNavigations: NavigationType[];
 }
 const MyTabBar: FC<MyTabBarProps> = ({tabNavigations}) => {
   const selectedNavigation = useAppSelector(SelectedNavigationSelector());
   const primaryColor = usePrimaryStyles().color;
   const dispatch = useAppDispatch();
   const {bottom} = useSafeAreaInsets();
-  const fetchDashboardSettingsAPI = (navigation: DrawerNavigation) => {
-    if (navigation.link_type === 'link') {
-      if (navigation.full_url) {
-        openLink(navigation.full_url);
+  const fetchDashboardSettingsAPI = (navigation: NavigationType) => {
+    if (navigation.page_type === 'link') {
+      if (navigation.link_url) {
+        openLink(navigation.link_url);
       }
     } else {
       dispatch(fetchDashboardSettings(navigation.id));
@@ -81,6 +84,9 @@ const MyTabBar: FC<MyTabBarProps> = ({tabNavigations}) => {
     }
   };
 
+  const colors = useColors();
+  const appTheme = useAppSelector(ThemeSelector());
+
   return (
     <>
       {tabNavigations && tabNavigations.length > 0 && (
@@ -89,7 +95,7 @@ const MyTabBar: FC<MyTabBarProps> = ({tabNavigations}) => {
             l.flexRow,
             l.alignCtr,
             BoxShadowStyles,
-            {backgroundColor: c.white, paddingBottom: bottom},
+            {backgroundColor: colors.white, paddingBottom: bottom},
           ]}>
           {tabNavigations.map((tabNavigation, index) => {
             return (
@@ -99,9 +105,16 @@ const MyTabBar: FC<MyTabBarProps> = ({tabNavigations}) => {
                   fetchDashboardSettingsAPI(tabNavigation);
                 }}
                 style={[l.px5, l.py10, l.flex, l.justifyCtr, l.alignCtr]}>
-                {tabNavigation.link_icon ? (
+                {tabNavigation.page_icon ? (
                   <FastImage
-                    source={{uri: tabNavigation.link_icon}}
+                    source={{
+                      uri:
+                        appTheme === 'dark'
+                          ? tabNavigation.page_icon_monochrome
+                            ? tabNavigation.page_icon_monochrome
+                            : tabNavigation.page_icon
+                          : tabNavigation.page_icon,
+                    }}
                     style={styles.imageStyle}
                   />
                 ) : (

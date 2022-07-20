@@ -1,51 +1,59 @@
 import React, {FC} from 'react';
-import {View, Text, ImageBackground, StyleSheet} from 'react-native';
+import {View, ImageBackground, StyleSheet} from 'react-native';
 import Button from '../../../components/Button';
+import Text from '../../../components/Text';
 
 // custom
 import {f, l, t} from '../../../styles/shared';
-import {StaticSlider as StaticSliderType} from '../../../types/responses/SettingResponseType';
+import {BannerSectionType} from '../../../types/responses/SettingResponseType';
 
 interface Props {
   fetchDashboardSettingsAPI?: (id: number, name: string) => void;
 }
 
-const StaticSlider: FC<StaticSliderType & Props> = ({
+const StaticSlider: FC<BannerSectionType & Props> = ({
+  fetchDashboardSettingsAPI,
+  id,
+  type,
   background_type,
-  background_image,
+  background_image_url,
   background_color,
   title,
+  title_size_small,
+  title_size_medium,
+  title_size_large,
+  title_text_color,
   title_layer_color,
   title_layer_transparency,
-  title_text_color,
-  title_size_medium,
-  subtitle,
-  subtitle_text_color,
-  subtitle_size_small,
-  subtitle_layer_transparency,
-  subtitle_layer_color,
-  destination_button_status,
-  destination_button_link_page,
-  fetchDashboardSettingsAPI,
+  sub_title,
+  sub_title_size_small,
+  sub_title_size_medium,
+  sub_title_size_large,
+  sub_title_text_color,
+  sub_title_layer_color,
+  sub_title_layer_transparency,
+  destination_button,
+  destination_id,
+  destination_url,
 }) => {
   const titleTransparency = title_layer_transparency
-    ? parseInt(title_layer_transparency).toString()
+    ? title_layer_transparency.toString()
     : '00';
-  const subsTitleTransparency = title_layer_transparency
-    ? parseInt(title_layer_transparency).toString()
+  const subsTitleTransparency = sub_title_layer_transparency
+    ? sub_title_layer_transparency.toString()
     : '00';
   const titleBackgroundColor = title_layer_color + titleTransparency;
-  const subTitleBackgroundColor = subtitle_layer_color + subsTitleTransparency;
+  const subTitleBackgroundColor = sub_title_layer_color + subsTitleTransparency;
 
   const onDestinationButtonPress = (id: number, name: string) => {
     fetchDashboardSettingsAPI?.(id, name);
   };
 
   return (
-    <View style={[l.mb20]}>
+    <View style={[l.m20, l.mb30]}>
       <ImageBackground
         source={{
-          uri: background_type === 'image' ? background_image : '',
+          uri: background_type === 'image' ? background_image_url || '' : '',
         }}
         resizeMode={'cover'}
         style={[
@@ -53,13 +61,14 @@ const StaticSlider: FC<StaticSliderType & Props> = ({
           {
             backgroundColor:
               background_type !== 'image' ? background_color : '',
+            borderRadius: 10,
           },
         ]}>
         {/* image overlay */}
         <View style={styles.overlay} />
 
         {/* title */}
-        {title && (
+        {title ? (
           <View
             style={[
               styles.staticSliderTextContainer,
@@ -70,16 +79,17 @@ const StaticSlider: FC<StaticSliderType & Props> = ({
                 styles.staticSliderText,
                 {
                   color: title_text_color,
-                  fontSize: parseInt(title_size_medium || '20'),
+                  fontSize: title_size_medium,
                 },
+                // f.fontWeightMedium,
               ]}>
               {title}
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* sub-title */}
-        {subtitle && (
+        {sub_title ? (
           <View
             style={[
               styles.staticSliderSubTextContainer,
@@ -89,19 +99,20 @@ const StaticSlider: FC<StaticSliderType & Props> = ({
               style={[
                 styles.staticSliderText,
                 {
-                  color: subtitle_text_color,
-                  fontSize: parseInt(subtitle_size_small || '16'),
+                  color: sub_title_text_color,
+                  fontSize: sub_title_size_small,
                 },
+                // f.fontWeightMedium,
               ]}>
-              {subtitle}
+              {sub_title}
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* destination Btn */}
-        {destination_button_status && destination_button_link_page?.name && (
+        {/* {destination_button ? (
           <Button
-            title={destination_button_link_page.name}
+            title={''}
             theme={'primary'}
             widgetStyles={{
               container: styles.destinationBtn,
@@ -109,12 +120,12 @@ const StaticSlider: FC<StaticSliderType & Props> = ({
             onPress={() => {
               onDestinationButtonPress(
                 // @ts-ignore
-                parseInt(destination_button_link_page.id),
-                destination_button_link_page.name,
+                parseInt(destination_id),
+                '',
               );
             }}
           />
-        )}
+        ) : null} */}
       </ImageBackground>
     </View>
   );
@@ -123,9 +134,10 @@ const StaticSlider: FC<StaticSliderType & Props> = ({
 const styles = StyleSheet.create({
   wrapper: {
     ...l.p20,
+    // ...l.mb30,
   },
   staticSliderImg: {
-    height: 250,
+    height: 200,
     ...l.justifyCtr,
     ...l.alignCtr,
     ...l.p20,

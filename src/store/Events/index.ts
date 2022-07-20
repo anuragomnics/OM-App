@@ -1,32 +1,42 @@
 import {createSlice, PayloadAction, createAction} from '@reduxjs/toolkit';
 
 // custom
-import {fetchEvents} from './ThunkActions';
+import {fetchAllEvents, fetchEvents} from './ThunkActions';
 import {
+  NewsType,
+  NewsResponseType,
+} from '../../types/responses/NewsResponsetype';
+import {PostsListSectionType} from '../../types/responses/SettingResponseType';
+import {
+  PaginationDetailsType,
+  PostsListResponseType,
+  PostType,
+} from '../../types/responses/PostsListResponseType';
+import {
+  EventsListResponseType,
   EventType,
-  EventsResponseType,
-} from '../../types/responses/EventsResponseType';
-
-export interface EventsList {
-  data: EventType[];
-  has_more: boolean;
-  total: number;
-  id?: number;
-}
+} from '../../types/responses/EventsListResponseType';
 
 interface EventsListObj {
-  [key: string]: EventsList;
+  [key: string]: EventType[];
+}
+interface EventsListPaginationObj {
+  [key: string]: PaginationDetailsType;
 }
 
 interface Store {
   eventsList: EventsListObj;
+  eventsPaginationDetails: EventsListPaginationObj;
+  allEvents: EventType[];
 }
 
 const initialState: Store = {
   eventsList: {},
+  eventsPaginationDetails: {},
+  allEvents: [],
 };
 
-export const resetEventsList = createAction('reset-news-list');
+export const resetEventsList = createAction('reset-events-list');
 
 const EventsSlice = createSlice({
   name: 'EVENTS_SLICE',
@@ -36,15 +46,11 @@ const EventsSlice = createSlice({
     builder.addCase(resetEventsList, () => initialState);
     builder.addCase(
       fetchEvents.fulfilled,
-      (state, action: PayloadAction<EventsResponseType>) => {
+      (state, action: PayloadAction<EventsListResponseType>) => {
         //@ts-ignore
         const ID = action?.meta?.arg?.id;
-        state.eventsList[ID] = {
-          data: action.payload.data,
-          has_more: action.payload.has_more,
-          total: action.payload.total,
-          id: ID,
-        };
+        state.eventsList[ID] = action.payload.eventDetails;
+        state.eventsPaginationDetails[ID] = action.payload.paginationDetails;
       },
     );
   },

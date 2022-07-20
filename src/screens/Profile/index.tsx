@@ -1,6 +1,5 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
+import {StyleSheet, View, ScrollView, TouchableOpacity} from 'react-native';
 import Header from '../../components/Header';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

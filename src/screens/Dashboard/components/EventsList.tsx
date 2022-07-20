@@ -1,14 +1,13 @@
 import React, {FC, useEffect, useRef, useState} from 'react';
-import {View, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {parse} from 'node-html-parser';
 
 // custom
 import FastImage from 'react-native-fast-image';
 import {c, f, l, t} from '../../../styles/shared';
 import Text from '../../../components/Text';
 import {usePrimaryStyles} from '../../../hooks/useThemeStyles';
-import {EventsListSettings} from '../../../types/responses/SettingResponseType';
+import {EventsListSectionType} from '../../../types/responses/SettingResponseType';
 import Input from '../../../components/FormControls/Input';
 import {
   useAppDispatch,
@@ -19,74 +18,119 @@ import FetchCoursesLoader from '../../../loaders/FetchCoursesLoader';
 import Button from '../../../components/Button';
 import NavigationService from '../../../services/NavigationService';
 import {ScreenID} from '../../../navigation/types';
+import DropDown from '../../../components/DropDown';
+import {getParsedTextFromHTML} from '../../../utils/HTMLParser';
+import {useColors} from '../../../styles/shared/Colors';
 import {
+  EventsListSelector,
+  EventsPaginationDetailsSelector,
   fetchEvents,
   fetchEventsPrefix,
-  EventsListSelector,
 } from '../../../store/Events';
-import DropDown from '../../../components/DropDown';
-import {BoxShadowStyles} from '../../../styles/elements';
-import {EventType} from '../../../types/responses/EventsResponseType';
-import {getParsedTextFromHTML} from '../../../utils/HTMLParser';
+import {EventType} from '../../../types/responses/EventsListResponseType';
+import {SettingsSelector} from '../../../store/Configuration';
+import moment from 'moment';
 
-interface Props extends EventsListSettings {
-  content: EventsListSettings;
+interface Props extends EventsListSectionType {
+  content: EventsListSectionType;
   index: number;
   ViewType?: string;
 }
 
 const EventsList: FC<Props> = ({
+  content,
+  index,
+  id,
   type,
   title,
-  top,
-  display_search_and_filter,
-  display_the_search_bar,
+  default_view,
+  switch_between_views,
   pagination,
-  limit,
-  list_background_color_code,
-  content,
+  items_per_page,
+  search_bar,
+  offset,
+  option_for_featured,
+  rule_type,
+  groups,
+  groups_condition,
+  categories,
+  categories_condition,
+  tags,
+  tags_condition,
   ViewType,
-  index,
+  sorting,
 }) => {
   const dispatch = useAppDispatch();
   const primaryColor = usePrimaryStyles().color;
-  const newsList = useAppSelector(EventsListSelector());
-  const showAllEvents = Boolean(ViewType === 'AllEvents');
+  const eventsList = useAppSelector(EventsListSelector());
+  const eventsListPaginationDetails = useAppSelector(
+    EventsPaginationDetailsSelector(),
+  );
+  const settings = useAppSelector(SettingsSelector());
+
+  const colors = useColors();
+  const showAllEvents = Boolean(ViewType === 'All');
+  const eventsArr = eventsList[index];
+  const paginationDetails = eventsListPaginationDetails[index];
+  const isPaginated = !showAllEvents && pagination;
 
   // refs
   const firstRender = useRef(true);
 
   // state
-  const [displayType, setDisplayType] = useState('list');
-  const [isPaginated, setIsPaginated] = useState(false);
+  const [displayType, setDisplayType] = useState(
+    default_view ? default_view : 'list',
+  );
   const [searchText, setSearchText] = useState('');
   const [currSearchKeyword, setCurrSearchKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedItem, setSelectedItem] =
-    useState<{name: string; value: number}>();
+  const [selectedItem, setSelectedItem] = useState<{
+    name: string;
+    value: string;
+    id: number;
+  }>();
+  const [APICompleted, setAPICompleted] = useState(false);
+  const [showViewAll, setShowViewAll] = useState(false);
 
-  // get EventsList API
+  // get Postslist API
   const fetchEventsAPI = () => {
     const params: any = {
-      pagination: pagination ? 1 : 0,
-      top: selectedItem ? selectedItem.value : top,
+      offset,
+      option_for_featured:
+        showAllEvents && selectedItem
+          ? selectedItem.value
+          : option_for_featured,
+      pagination: showAllEvents ? 0 : pagination,
+      items_per_page,
+      rule_type,
+      groups_condition,
+      categories_condition,
+      tags_condition,
       id: index,
+      sorting,
+      type,
     };
-    if (searchText) {
-      params['keyword'] = searchText;
-    }
-    if (limit) {
-      params['limit'] = limit;
-    } else {
-      params['limit'] = 1000;
-    }
+
+    if (groups) params.groups = groups;
+    if (categories) params.categories = categories;
+    if (tags) params.tags = tags;
+
     dispatch(fetchEvents(params));
   };
 
   useEffect(() => {
     setIsLoading(true);
     fetchEventsAPI();
-  }, [selectedItem?.value, currSearchKeyword]);
+  }, []);
+
+  const getupdatedEvents = () => {
+    const updatedEvents = (eventsArr || []).filter(event => {
+      return (event.title || '')
+        .toLocaleLowerCase()
+        .includes((searchText || '').toLocaleLowerCase());
+    });
+    return updatedEvents;
+  };
 
   // set current Search text
   const onSearchPress = () => {
@@ -96,34 +140,29 @@ const EventsList: FC<Props> = ({
   useThunkCallbackAction(
     fetchEventsPrefix,
     () => {
-      if (isLoading) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+      setAPICompleted(true);
     },
     () => {
-      if (isLoading) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+      setAPICompleted(true);
     },
   );
 
-  const myEventsList = newsList[index];
-  const total = myEventsList?.total;
-  const defaultPagination = 4;
-  let EventsArr = myEventsList?.data;
-  // if pagination is enabled slice the data with default pagination count
-  if (total > defaultPagination && !showAllEvents) {
-    EventsArr = EventsArr.slice(0, defaultPagination);
-    if (!isPaginated && pagination) {
-      setIsPaginated(true);
-    }
-  } else if (isPaginated) {
-    setIsPaginated(false);
-  }
-
-  const onSelectItemPress = (item: {name: string; value: number}) => {
+  const onSelectItemPress = (item: {
+    name: string;
+    value: string;
+    id: number;
+  }) => {
     setSelectedItem(item);
   };
+
+  useEffect(() => {
+    if (selectedItem) {
+      setIsLoading(true);
+      fetchEventsAPI();
+    }
+  }, [selectedItem?.value]);
 
   // navigations
   const goToAllEvents = () => {
@@ -131,55 +170,58 @@ const EventsList: FC<Props> = ({
       content,
     });
   };
-  const goToEventsDetails = (event: EventType) => {
+  const goToEventDetails = (event: EventType) => {
     NavigationService.pushToScreen(ScreenID.EventDetails, {
       event,
     });
   };
 
   const dropdownItems = [
-    {name: 'No-Featured', value: 0},
-    {name: 'Featured', value: 1},
-    {name: 'Show All', value: -1},
+    {name: 'Beiträge', value: 'unfeatured', id: 1},
+    {name: 'Top-Beiträge', value: 'featured', id: 2},
+    {name: 'Alle anzeigen', value: 'all', id: 3},
   ];
-  const dropdownItemsTopIndex = dropdownItems.findIndex(v => v.value === top);
+
+  const dropdownItemsTopIndex =
+    dropdownItems.findIndex(v => v.value === option_for_featured) || 0;
+  // const dropdownItemsTopIndex = 0;
+
+  const displayEvents = getupdatedEvents();
 
   return (
     <View style={[l.mb30]}>
-      <View style={[l.flexRow, l.alignCtr, l.justifyBtw, l.mb10]}>
+      <View
+        style={[
+          l.flexRow,
+          l.alignCtr,
+          l.justifyBtw,
+          search_bar ? l.mb15 : l.mb20,
+        ]}>
         {/* title */}
-        {!showAllEvents && (
-          <Text style={[t.h3, f.fontWeightMedium, l.flex]}>{title}</Text>
-        )}
+        {!showAllEvents ? (
+          <Text style={[t.h4, l.flex, f.fontWeightMedium]}>{title}</Text>
+        ) : null}
 
         {/* filter */}
-        {/* {showAllEvents && display_search_and_filter && (
-          <View style={[l.flex, l.mr15]}>
-            <DropDown
-              items={dropdownItems}
-              onSelectItem={onSelectItemPress}
-              defaultIndex={
-                firstRender.current
-                  ? dropdownItemsTopIndex !== -1
-                    ? dropdownItemsTopIndex
-                    : 2
-                  : 2
-              }
-            />
-          </View>
-        )} */}
+        {showAllEvents && search_bar ? (
+          <DropDown
+            items={dropdownItems}
+            onSelectItem={onSelectItemPress}
+            defaultIndex={dropdownItemsTopIndex}
+          />
+        ) : null}
 
         {/* layout actions */}
-        {!showAllEvents && display_search_and_filter && (
-          <View style={[l.flexRow, l.alignCtr]}>
+        {switch_between_views ? (
+          <View style={[l.flexRow, l.alignCtr, l.ml10]}>
             <TouchableOpacity
               onPress={() => {
                 setDisplayType('list');
               }}>
               <Icon
                 name={'format-list-bulleted'}
-                color={displayType === 'list' ? primaryColor : c.black400}
-                size={28}
+                color={displayType === 'list' ? primaryColor : colors.black400}
+                size={23}
               />
             </TouchableOpacity>
             <View style={[l.ml10]} />
@@ -189,81 +231,63 @@ const EventsList: FC<Props> = ({
               }}>
               <Icon
                 name={'grid-view'}
-                color={displayType === 'grid' ? primaryColor : c.black400}
-                size={25}
+                color={displayType === 'grid' ? primaryColor : colors.black400}
+                size={20}
               />
             </TouchableOpacity>
           </View>
-        )}
+        ) : null}
       </View>
 
       {/* search */}
-      <View style={[l.flexRow, l.alignCtr, l.mb15]}>
-        {display_the_search_bar && (
-          <View style={[l.flex, l.flexRow, l.alignCtr]}>
-            <Input
-              type={'search'}
-              onClearSearch={() => {
-                setCurrSearchKeyword('');
-              }}
-              widgetStyles={{
-                container: {...l.flex, marginBottom: 0},
-                wrapper: {backgroundColor: c.white},
-              }}
-              placeholder={'Suchen'}
-              leftIcon={{iconName: 'search'}}
-              onChangeText={text => {
-                setSearchText(text);
-              }}
-              value={searchText}
-              returnKeyType={'search'}
-              onSubmitEditing={onSearchPress}
-            />
-          </View>
-        )}
-        {showAllEvents && display_search_and_filter && (
-          <View style={[l.flexRow, l.alignCtr, l.ml15]}>
-            <TouchableOpacity
-              onPress={() => {
-                setDisplayType('list');
-              }}>
-              <Icon
-                name={'format-list-bulleted'}
-                color={displayType === 'list' ? primaryColor : c.black400}
-                size={28}
-              />
-            </TouchableOpacity>
-            <View style={[l.ml10]} />
-            <TouchableOpacity
-              onPress={() => {
-                setDisplayType('grid');
-              }}>
-              <Icon
-                name={'grid-view'}
-                color={displayType === 'grid' ? primaryColor : c.black400}
-                size={25}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      {search_bar ? (
+        <View style={[l.flexRow, l.alignCtr, l.mb20]}>
+          <Input
+            type={'search'}
+            onClearSearch={() => {
+              setCurrSearchKeyword('');
+            }}
+            widgetStyles={{
+              container: {...l.flex, marginBottom: 0},
+            }}
+            placeholder={'Suchen'}
+            leftIcon={{iconName: 'search'}}
+            onChangeText={text => {
+              setSearchText(text || '');
+            }}
+            value={searchText}
+            returnKeyType={'search'}
+            // onChangeText={onSearchPress}
+            // onSubmitEditing={onSearchPress}
+          />
+        </View>
+      ) : null}
 
-      {/* News data */}
-      {isLoading && (
-        <FetchCoursesLoader numberOfItems={showAllEvents ? 4 : 2} />
-      )}
+      {isLoading ? (
+        <FetchCoursesLoader
+          numberOfItems={showAllEvents ? 4 : 2}
+          type={displayType}
+        />
+      ) : null}
+
       {!isLoading && (
         <>
           <View
             style={
               displayType === 'list' ? {} : [l.flexRow, l.justifyBtw, l.wrap]
             }>
-            {(!EventsArr || EventsArr.length === 0) && (
-              <Text>{'No Matches Found'}</Text>
-            )}
-            {EventsArr &&
-              EventsArr.map((event, i) => {
-                const description = getParsedTextFromHTML(event.description);
+            {(!displayEvents || displayEvents.length === 0) && APICompleted ? (
+              <Text>{'Keine Einträge gefunden'}</Text>
+            ) : null}
+            {displayEvents &&
+              displayEvents.map((event, i) => {
+                // const root = parse(news.description);
+                // const parsedDescription =
+                //   root.querySelector('p')?.textContent || '';
+                const description = getParsedTextFromHTML(
+                  event.description || '',
+                );
+                // const authors = news?.authors.map(a => a.name).join(', ');
 
                 return (
                   <TouchableOpacity
@@ -272,130 +296,70 @@ const EventsList: FC<Props> = ({
                       // BoxShadowStyles,
                       displayType == 'list'
                         ? [
-                            styles.eventsListContainer,
-                            i !== EventsArr.length - 1 ? l.mb15 : {},
+                            styles.courseListContainer,
+                            i !== displayEvents.length - 1 ? l.mb20 : {},
                           ]
-                        : styles.eventsGridContainer,
-                      list_background_color_code
-                        ? {backgroundColor: list_background_color_code}
-                        : {},
+                        : styles.courseGridContainer,
                     ]}
                     onPress={() => {
-                      goToEventsDetails(event);
+                      goToEventDetails(event);
                     }}>
                     {/* banner image */}
                     <FastImage
-                      source={{uri: event.image}}
-                      style={
+                      source={{
+                        uri: event.event_image_url,
+                      }}
+                      style={[
                         displayType == 'list'
-                          ? styles.eventsListImg
-                          : styles.eventGridImg
-                      }
+                          ? styles.courseListImg
+                          : styles.courseGridImg,
+                      ]}
+                      resizeMode={FastImage.resizeMode.cover}
                     />
+                    {/* topnews flag */}
+                    {event.top_event ? (
+                      <Text
+                        style={[
+                          displayType === 'list'
+                            ? styles.topNewsList
+                            : styles.topNewsGrid,
+                          {backgroundColor: primaryColor},
+                        ]}>
+                        {'Top event'}
+                      </Text>
+                    ) : null}
                     <View
                       style={
                         displayType == 'list'
-                          ? styles.eventWrapper
-                          : styles.eventGridWrapper
+                          ? styles.courseWrapper
+                          : styles.courseGridWrapper
                       }>
-                      <View>
+                      <View style={[]}>
                         {/* title */}
                         <Text
-                          style={[t.h5, f.fontWeightMedium]}
-                          numberOfLines={1}>
+                          style={[t.h5, f.fontWeightMedium, {lineHeight: 20}]}
+                          numberOfLines={2}>
                           {event.title}
                         </Text>
 
-                        {/* description */}
-                        {description ? (
-                          <Text style={styles.description} numberOfLines={2}>
-                            {description ? description : ''}
-                          </Text>
-                        ) : null}
-
-                        {/* EVent Date */}
-                        {event?.full_event_date ? (
-                          <View style={[l.flexRow, l.mt10, l.alignCtr]}>
-                            <Icon
-                              name={'event'}
-                              color={primaryColor}
-                              size={16}
-                            />
-                            <Text
-                              style={[
-                                l.ml5,
-                                t.pSM,
-                                f.fontWeightMedium,
-                                {color: c.black200},
-                              ]}
-                              numberOfLines={1}>
-                              {event.full_event_date}
-                            </Text>
-                          </View>
-                        ) : null}
-
-                        {/* Oragnizer */}
-                        {event?.organizer ? (
-                          <View
-                            style={[
-                              l.flexRow,
-                              event?.full_event_date ? l.mt5 : l.mt10,
-                              l.alignCtr,
-                            ]}>
-                            <Icon
-                              name={'people'}
-                              color={primaryColor}
-                              size={16}
-                            />
-                            <Text
-                              style={[
-                                l.ml5,
-                                t.pSM,
-
-                                f.fontWeightMedium,
-                                {color: c.black200},
-                              ]}
-                              numberOfLines={1}>
-                              {event.organizer.name}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </View>
-
-                      {/* price */}
-                      <View style={[l.flexRow, l.alignCtr, l.mt10]}>
-                        {event?.price && (
+                        <View style={[l.flexRow, l.alignCtr]}>
                           <Text
                             style={[
-                              t.h5,
-                              f.fontWeightBold,
-                              l.flex,
-                              {color: primaryColor},
+                              t.pSM,
+                              f.fontWeightMedium,
+                              l.mb5,
+                              {color: c.black150},
+                              l.mt5,
                             ]}>
-                            {event.display_price}
+                            {event?.start_date
+                              ? moment(
+                                  event?.start_date,
+                                  'YYYY-MM-DD HH:mm:ss',
+                                ).format('DD.MM.YYYY | HH:mm')
+                              : 'mehr erfahren'}
                           </Text>
-                        )}
-                        {event.top_event && displayType === 'list' && (
-                          <Text
-                            style={[
-                              styles.topEvent,
-                              {backgroundColor: primaryColor},
-                            ]}>
-                            {'Top event'}
-                          </Text>
-                        )}
+                        </View>
                       </View>
-
-                      {/* top event flag */}
-                      {event.top_event && displayType !== 'list' && (
-                        <Text
-                          style={[
-                            styles.topEventGrid,
-                            {backgroundColor: primaryColor},
-                          ]}>
-                          {'Top event'}
-                        </Text>
-                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -403,9 +367,14 @@ const EventsList: FC<Props> = ({
           </View>
 
           {/* view All */}
-          {isPaginated && (
-            <View style={[l.mt15, l.flexRow, l.justifyCtr, l.alignCtr]}>
-              <Text>{`Zeige ${defaultPagination} von ${total}`}</Text>
+          {isPaginated &&
+          paginationDetails &&
+          paginationDetails.total_items <
+            paginationDetails.actual_total_items ? (
+            <View style={[l.mt20, l.flexRow, l.justifyCtr, l.alignCtr]}>
+              {paginationDetails ? (
+                <Text>{`Zeige ${paginationDetails.total_items} von ${paginationDetails.actual_total_items}`}</Text>
+              ) : null}
               <View style={[l.ml10]}>
                 <Button
                   theme={'simplePrimary'}
@@ -414,7 +383,7 @@ const EventsList: FC<Props> = ({
                 />
               </View>
             </View>
-          )}
+          ) : null}
         </>
       )}
     </View>
@@ -422,67 +391,73 @@ const EventsList: FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  eventsListContainer: {
+  courseListContainer: {
     ...l.flexRow,
-    backgroundColor: c.white,
-    ...l.p15,
-    ...l.defaultBorderRadius,
   },
-  eventsGridContainer: {
-    width: '48%',
+  courseGridContainer: {
+    width: '47.5%',
     ...l.mb15,
-    backgroundColor: c.white,
-    ...l.defaultBorderRadius,
     overflow: 'hidden',
   },
-  eventsListImg: {
-    width: 70,
-    height: 70,
-    borderWidth: 0.5,
+  courseListImg: {
+    width: 100,
+    height: 65,
+    borderWidth: 0,
     borderColor: '#ccc',
-    ...l.defaultBorderRadius,
+    borderRadius: 10,
   },
-  eventGridImg: {
+  courseGridImg: {
     width: '100%',
     height: 120,
+    borderRadius: 10,
   },
-  eventWrapper: {
-    ...l.ml10,
+  courseWrapper: {
+    ...l.ml15,
     flex: 1,
-    justifyContent: 'space-between',
+    ...l.flexRow,
   },
-  eventGridWrapper: {
-    ...l.p10,
+  courseGridWrapper: {
+    ...l.mt5,
+    ...l.mb10,
     flex: 1,
-    justifyContent: 'space-between',
   },
   dot: {
     ...l.mx5,
   },
-  topEvent: {
+  topNewsList: {
     padding: 2,
     ...t.pXS,
     color: '#fff',
     ...f.fontWeightMedium,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  topEventGrid: {
-    padding: 2,
-    ...t.pXS,
-    color: '#fff',
-    ...f.fontWeightMedium,
-    ...l.mt10,
+    ...l.mt5,
     borderRadius: 2,
     overflow: 'hidden',
     position: 'absolute',
-    top: -20,
-    left: 10,
+    // top: -20,
+    left: 5,
+  },
+  topNewsGrid: {
+    padding: 2,
+    ...t.pXS,
+    color: '#fff',
+    ...f.fontWeightMedium,
+    ...l.mt5,
+    borderRadius: 2,
+    overflow: 'hidden',
+    position: 'absolute',
+    // top: -20,
+    left: 5,
   },
   description: {
-    color: c.black200,
-    lineHeight: 18,
+    // color: c.black200,
+  },
+  readMore: {
+    color: c.black150,
+    // lineHeight: 18,
     ...l.mt5,
+    // marginTop: 2,
+    ...t.pSM,
+    ...f.fontWeightMedium,
   },
 });
 

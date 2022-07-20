@@ -17,9 +17,10 @@ import {
   useThunkCallbackAction,
 } from '../../hooks/useRedux';
 import {
-  fetchAllNews,
-  AllNewsListSelector,
-  fetchAllNewsPrefix,
+  fetchAllPosts,
+  AllPostsListSelector,
+  fetchAllPostsPrefix,
+  PostsListSelector,
 } from '../../store/News';
 import FetchCoursesLoader from '../../loaders/FetchCoursesLoader';
 import {getParsedTextFromHTML} from '../../utils/HTMLParser';
@@ -27,6 +28,7 @@ import {NewsType} from '../../types/responses/NewsResponsetype';
 import {usePrimaryStyles} from '../../hooks/useThemeStyles';
 import NavigationService from '../../services/NavigationService';
 import FastImage from 'react-native-fast-image';
+import {PostType} from '../../types/responses/PostsListResponseType';
 
 interface Props {
   route: RouteProp<RootStackParams, ScreenID.AppSearch>;
@@ -36,10 +38,10 @@ const AppSearch: FC<Props> = ({route}) => {
   // @ts-ignore
   const {appSearchText = ''} = route.params;
   const dispatch = useAppDispatch();
-  const allNewsList = useAppSelector(AllNewsListSelector());
+  const allPostsList = useAppSelector(AllPostsListSelector());
   const primaryColor = usePrimaryStyles().color;
   // @ts-ignore
-  let newsArr = allNewsList?.data;
+  let newsArr = allPostsList;
 
   //   state
   const [searchText, setSearchText] = useState(appSearchText);
@@ -54,7 +56,7 @@ const AppSearch: FC<Props> = ({route}) => {
   }, []);
 
   useThunkCallbackAction(
-    fetchAllNewsPrefix,
+    fetchAllPostsPrefix,
     () => {
       setAPICompleted(true);
       setIsLoading(false);
@@ -76,7 +78,7 @@ const AppSearch: FC<Props> = ({route}) => {
       params['keyword'] = text;
     }
     params['limit'] = 1000;
-    dispatch(fetchAllNews(params));
+    dispatch(fetchAllPosts(params));
   };
 
   const onSearchPress = () => {
@@ -84,9 +86,9 @@ const AppSearch: FC<Props> = ({route}) => {
     fetchNewsAPI(searchText);
   };
 
-  const goToNewsDetails = (news: NewsType) => {
-    NavigationService.pushToScreen(ScreenID.NewsDetails, {
-      news,
+  const goToPostDetails = (post: PostType) => {
+    NavigationService.pushToScreen(ScreenID.PostDetails, {
+      post,
     });
   };
 
@@ -127,17 +129,17 @@ const AppSearch: FC<Props> = ({route}) => {
                     : [l.flexRow, l.justifyBtw, l.wrap]
                 }>
                 {(!newsArr || newsArr.length === 0) && APICompleted && (
-                  <Text>{'No Matches Found'}</Text>
+                  <Text>{'Keine Einträge gefunden'}</Text>
                 )}
                 {newsArr &&
-                  newsArr.map((news: NewsType, i: number) => {
+                  newsArr.map((news, i) => {
                     // const root = parse(news.description);
                     // const parsedDescription =
                     //   root.querySelector('p')?.textContent || '';
                     const description = getParsedTextFromHTML(
                       news.introduction,
                     );
-                    const authors = news?.authors.map(a => a.name).join(', ');
+                    // const authors = news?.authors.map(a => a.name).join(', ');
 
                     return (
                       <TouchableOpacity
@@ -152,12 +154,15 @@ const AppSearch: FC<Props> = ({route}) => {
                             : styles.courseGridContainer,
                         ]}
                         onPress={() => {
-                          goToNewsDetails(news);
+                          goToPostDetails(news);
                         }}>
                         {/* banner image */}
                         <FastImage
                           source={{
-                            uri: news.primary_image,
+                            uri:
+                              news.post_type === 'image'
+                                ? news.post_media_url
+                                : news.post_thumbnail_url,
                           }}
                           style={[
                             displayType == 'list'
@@ -186,7 +191,7 @@ const AppSearch: FC<Props> = ({route}) => {
                             </Text>
 
                             {/* Authors */}
-                            {authors ? (
+                            {/* {authors ? (
                               <View style={[l.flexRow, l.mt10, l.alignCtr]}>
                                 <Icon
                                   name={'people'}
@@ -205,11 +210,11 @@ const AppSearch: FC<Props> = ({route}) => {
                                   {authors}
                                 </Text>
                               </View>
-                            ) : null}
+                            ) : null} */}
                           </View>
 
                           {/* topnews flag */}
-                          {news.top_news && (
+                          {news.top_post && (
                             <Text
                               style={[
                                 displayType === 'list'
@@ -217,7 +222,7 @@ const AppSearch: FC<Props> = ({route}) => {
                                   : styles.topNewsGrid,
                                 {backgroundColor: primaryColor},
                               ]}>
-                              {'Top news'}
+                              {'Top post'}
                             </Text>
                           )}
                         </View>

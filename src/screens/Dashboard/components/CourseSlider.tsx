@@ -13,54 +13,122 @@ import to from 'await-to-js';
 
 // custom
 import {c, f, l, t} from '../../../styles/shared';
-import {CourseSlider as CourseSlidertype} from '../../../types/responses/SettingResponseType';
+import {
+  CourseSlider as CourseSlidertype,
+  PostsCarouselSectionType,
+} from '../../../types/responses/SettingResponseType';
 import Text from '../../../components/Text';
 import {Course as CourseType} from '../../../types/responses/SettingResponseType';
 import {getParsedTextFromHTML} from '../../../utils/HTMLParser';
-import {EventType} from '../../../types/responses/EventsResponseType';
-import {NewsType} from '../../../types/responses/NewsResponsetype';
 import NavigationService from '../../../services/NavigationService';
 import {ScreenID} from '../../../navigation/types';
 import WebView from 'react-native-webview';
 import {useNavigation} from '@react-navigation/core';
+import {PostType} from '../../../types/responses/PostsListResponseType';
+import {
+  useAppDispatch,
+  useAppSelector,
+  useThunkCallbackAction,
+} from '../../../hooks/useRedux';
+import {
+  fetchPosts,
+  fetchPostsPrefix,
+  PostsListSelector,
+} from '../../../store/News';
+import FetchCoursesLoader from '../../../loaders/FetchCoursesLoader';
+import {useColors} from '../../../styles/shared/Colors';
+import moment from 'moment';
+import {SettingsSelector} from '../../../store/Configuration';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const deviceWidth = Dimensions.get('window').width;
 
-const courseItemMargin = 15;
+const courseItemMargin = 20;
 
-const CourseSlider: FC<CourseSlidertype> = ({
+interface Props extends PostsCarouselSectionType {
+  content: PostsCarouselSectionType;
+  index: number;
+  ViewType?: string;
+}
+
+const CourseSlider: FC<Props> = ({
+  content,
   title,
   type,
-  item_number_per_slider = 1,
-  ...rest
+  offset,
+  option_for_featured,
+  total_items,
+  sorting,
+  maximum_items_per_carousel,
+  rule_type,
+  groups,
+  groups_condition,
+  categories,
+  categories_condition,
+  tags,
+  tags_condition,
+  index,
 }) => {
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation();
+  const colors = useColors();
+  const postsList = useAppSelector(PostsListSelector());
+  const settings = useAppSelector(SettingsSelector());
+
   // ref
   const WebviewRef = useRef(null);
 
   // state
   const [imageUrls, setImageUrls] = useState({});
-  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // get Postslist API
+  const fetchPostsAPI = () => {
+    const params: any = {
+      offset,
+      option_for_featured,
+      total_items,
+      sorting,
+      rule_type,
+      groups_condition,
+      categories_condition,
+      tags_condition,
+      id: index,
+      type,
+    };
+
+    if (groups) params.groups = groups;
+    if (categories) params.categories = categories;
+    if (tags) params.tags = tags;
+
+    dispatch(fetchPosts(params));
+  };
+
   useEffect(() => {
+    setIsLoading(true);
+    fetchPostsAPI();
+
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         // @ts-ignore
         WebviewRef.current?.reload?.();
       }
     });
-
     return () => {
       // @ts-ignore
       subscription?.remove();
     };
   }, []);
-  // useEffect(() => {
-  //   const unsubscribe = navigation.addListener('focus', () => {
-  //     WebviewRef.current?.reload?.();
-  //   });
 
-  //   // Return the function to unsubscribe from the event so it gets removed on unmount
-  //   return unsubscribe;
-  // }, []);
+  useThunkCallbackAction(
+    fetchPostsPrefix,
+    () => {
+      setIsLoading(false);
+    },
+    () => {
+      setIsLoading(false);
+    },
+  );
 
   const renderImage = (imageUrl: string, backgroundPosition: string = '') => {
     return `<!DOCTYPE html>
@@ -83,43 +151,26 @@ const CourseSlider: FC<CourseSlidertype> = ({
       </html>`;
   };
 
-  const propertyName: string =
-    type === 'course_slider'
-      ? 'courses'
-      : type === 'event_slider'
-      ? 'events'
-      : 'news';
-  // @ts-ignore
-  const DATA: Array<CourseType | EventType | NewsType> = rest[propertyName];
-  const endSlideWidth = item_number_per_slider === 1 ? 70 : 40;
-  const courseItemWidth =
-    deviceWidth / item_number_per_slider -
-    item_number_per_slider * courseItemMargin -
-    endSlideWidth / item_number_per_slider;
-  const isSingleItem = DATA.length === 1;
+  const maximumItemsPerCarousel = parseInt(maximum_items_per_carousel || '1');
 
-  const onPress = (item: CourseType | EventType | NewsType) => {
-    if (type === 'course_slider') {
-      NavigationService.pushToScreen(ScreenID.CouseDetails, {
-        course: item,
-        fromSlider: true,
-      });
-    } else if (type === 'event_slider') {
-      NavigationService.pushToScreen(ScreenID.EventDetails, {
-        event: item,
-        fromSlider: true,
-      });
-    } else if (type === 'news_slider') {
-      NavigationService.pushToScreen(ScreenID.NewsDetails, {
-        news: item,
-        fromSlider: true,
-      });
-    }
+  const DATA: any = [];
+  const endSlideWidth = maximumItemsPerCarousel === 1 ? 120 : 20;
+  const courseItemWidth =
+    deviceWidth / maximumItemsPerCarousel -
+    maximumItemsPerCarousel * courseItemMargin -
+    endSlideWidth / maximumItemsPerCarousel;
+  const isSingleItem = DATA.length === 1;
+  const postsArr = postsList[index];
+
+  const onPress = (post: PostType) => {
+    NavigationService.pushToScreen(ScreenID.PostDetails, {
+      post,
+    });
   };
 
   return (
-    <View style={[l.mb30]}>
-      <Text style={[t.h3, f.fontWeightMedium]}>{title}</Text>
+    <View style={[l.mb20]}>
+      <Text style={[t.h4, f.fontWeightMedium]}>{title}</Text>
       <ScrollView
         style={[l.mt10]}
         contentContainerStyle={[
@@ -130,78 +181,133 @@ const CourseSlider: FC<CourseSlidertype> = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         bounces={false}>
-        {DATA.map((item, index) => {
-          let description = item.description;
-          if (type !== 'course_slider') {
-            description = getParsedTextFromHTML(item.description);
-          }
-          const {css_bg_position} = item?.image_focus_point;
+        {isLoading && (
+          <FetchCoursesLoader
+            numberOfItems={4}
+            type={'carousel'}
+            maximumCarouselItems={maximumItemsPerCarousel}
+          />
+        )}
 
-          return (
-            <TouchableOpacity
-              key={index}
-              style={{
-                marginRight: isSingleItem
-                  ? 0
-                  : index !== DATA.length - 1
-                  ? courseItemMargin
-                  : 0,
-                backgroundColor: c.white,
-                ...l.defaultBorderRadius,
-                overflow: 'hidden',
-                width: isSingleItem ? '100%' : courseItemWidth,
-              }}
-              onPress={() => {
-                onPress(item);
-              }}>
-              <WebView
-                ref={WebviewRef}
+        {!postsArr || postsArr.length === 0 ? (
+          <Text>{'Keine Einträge gefunden'}</Text>
+        ) : null}
+
+        {postsArr &&
+          postsArr.map((post, index) => {
+            const description = getParsedTextFromHTML(post.introduction);
+            // @ts-ignore
+            const {css_bg_position} = post?.image_focus_point || {};
+            const thumbnail =
+              post.post_type === 'image'
+                ? post.post_media_url
+                : post.post_thumbnail_url;
+
+            return (
+              <TouchableOpacity
+                key={index}
                 style={{
-                  width: '100%',
-                  height: isSingleItem
-                    ? 150
-                    : item_number_per_slider === 1
-                    ? 150
-                    : 100,
+                  marginRight: isSingleItem
+                    ? 0
+                    : index !== DATA.length - 1
+                    ? courseItemMargin
+                    : 0,
+                  width: isSingleItem ? '100%' : courseItemWidth,
                 }}
-                javaScriptEnabled={true}
-                scrollEnabled={false}
-                androidLayerType={'hardware'}
-                androidHardwareAccelerationDisabled
-                source={{
-                  html: renderImage(item.image, css_bg_position),
-                }}></WebView>
-              {/* <FastImage
-                // @ts-ignore
-                source={{uri: item.image}}
-                style={{
-                  width: '100%',
-                  height: isSingleItem
-                    ? 150
-                    : item_number_per_slider === 1
-                    ? 150
-                    : 100,
-                }}
-                resizeMode={FastImage.resizeMode.cover}
-              /> */}
-              <View style={[l.p10]}>
-                <Text
-                  numberOfLines={item_number_per_slider === 1 ? 2 : 1}
-                  style={[f.fontWeightMedium]}>
-                  {/* @ts-ignore */}
-                  {item.name}
-                </Text>
-                {/* {item_number_per_slider === 1 && (
+                onPress={() => {
+                  onPress(post);
+                }}>
+                <View
+                  style={{
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                  }}>
+                  {/* <WebView
+                    ref={WebviewRef}
+                    style={{
+                      width: '100%',
+                      maxHeight: isSingleItem
+                        ? 130
+                        : maximumItemsPerCarousel === 1
+                        ? 130
+                        : 100,
+                      height: isSingleItem
+                        ? 130
+                        : maximumItemsPerCarousel === 1
+                        ? 130
+                        : 100,
+                    }}
+                    javaScriptEnabled={true}
+                    scrollEnabled={false}
+                    androidLayerType={'hardware'}
+                    androidHardwareAccelerationDisabled
+                    source={{
+                      html: renderImage(thumbnail, css_bg_position),
+                    }}></WebView> */}
+                  <FastImage
+                    source={{uri: thumbnail}}
+                    style={{
+                      width: '100%',
+                      height: isSingleItem
+                        ? 140
+                        : maximumItemsPerCarousel === 1
+                        ? 140
+                        : 100,
+                    }}
+                    resizeMode={FastImage.resizeMode.cover}
+                  />
+                </View>
+
+                <View style={[l.mt5]}>
                   <Text
-                    numberOfLines={2}
-                    style={[l.mt5, t.lh18, {color: c.black200}]}>
-                    {description ? description : ''}
+                    numberOfLines={maximumItemsPerCarousel === 1 ? 2 : 2}
+                    style={[t.p, f.fontWeightMedium, {lineHeight: 20}]}>
+                    {post.title}
                   </Text>
-                )} */}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+                  {settings.posts_general_settings
+                    ?.posts_details_date_time_format === 'none' ? (
+                    <Text
+                      style={{
+                        color: c.black150,
+                        ...f.fontWeightMedium,
+                        ...t.pSM,
+                      }}>
+                      {'mehr erfahren'}
+                    </Text>
+                  ) : null}
+                </View>
+
+                {settings.posts_general_settings
+                  ?.posts_details_date_time_format !== 'none' &&
+                  post?.published_at && (
+                    <View style={[l.flexRow, l.alignCtr]}>
+                      {/* <Icon name={'event'} size={16} color={colors.black150} /> */}
+
+                      <Text
+                        style={[
+                          t.pSM,
+                          f.fontWeightMedium,
+                          l.mb5,
+                          {color: c.black150},
+                          l.mt5,
+                        ]}>
+                        {post?.published_at
+                          ? moment(
+                              post?.published_at,
+                              'YYYY-MM-DD HH:mm:ss',
+                            ).format(
+                              settings.posts_general_settings
+                                ?.posts_details_date_time_format === 'date_time'
+                                ? 'DD.MM.YYYY | HH:mm'
+                                : 'DD.MM.YYYY',
+                            )
+                          : ''}
+                      </Text>
+                    </View>
+                  )}
+              </TouchableOpacity>
+            );
+          })}
       </ScrollView>
     </View>
   );

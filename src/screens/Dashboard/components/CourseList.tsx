@@ -241,7 +241,7 @@ const CourseList: FC<Props> = ({
               displayType === 'list' ? {} : [l.flexRow, l.justifyBtw, l.wrap]
             }>
             {(!courses || courses.length === 0) && (
-              <Text>{'No Matches Found'}</Text>
+              <Text>{'Keine Einträge gefunden'}</Text>
             )}
             {courses &&
               courses.map((course, i) => {
@@ -371,11 +371,11 @@ const CourseList: FC<Props> = ({
           </View>
           {isPaginated && (
             <View style={[l.mt15, l.flexRow, l.justifyCtr, l.alignCtr]}>
-              <Text>{`Showing ${defaultPagination} of ${total}`}</Text>
+              <Text>{`Zeige ${defaultPagination} von ${total}`}</Text>
               <View style={[l.ml10]}>
                 <Button
                   theme={'simplePrimary'}
-                  title={'View All'}
+                  title={'Alle anzeigen'}
                   onPress={goToAllCourses}
                 />
               </View>

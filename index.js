@@ -7,7 +7,9 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 import Constants from './src/config/Constants';
 
-// Must be outside of any component LifeCycle (such as `componentDidMount`).
+import TrackPlayer from 'react-native-track-player';
+
+// // Must be outside of any component LifeCycle (such as `componentDidMount`).
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
@@ -51,7 +53,7 @@ PushNotification.configure({
   requestPermissions: true,
 });
 
-// reset badge number after opening app
+// // reset badge number after opening app
 Platform.OS === 'ios' && PushNotificationIOS.setApplicationIconBadgeNumber(0);
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -59,3 +61,4 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
 });
 
 AppRegistry.registerComponent(appName, () => App);
+TrackPlayer.registerPlaybackService(() => require('./service'));

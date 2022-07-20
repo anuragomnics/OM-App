@@ -5,8 +5,11 @@ import {MasterDataService} from '../../services/MasterDataService';
 import {SalutationResponseType} from '../../types/responses/SalutationResponseType';
 import {MasterDataStore} from './index';
 import {TitleResponseType} from '../../types/responses/TitleResponseType';
+import NewsService from '../../services/PostsService';
 
 export const GetMasterDataPrefix = '@MasterData/GetMasterData';
+export const fetchLawTextDetailsByIdPrefix =
+  '@MasterData/fetchLawTextDetailsById';
 
 export const fetchGetMasterData = createAsyncThunk(
   GetMasterDataPrefix,

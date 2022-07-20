@@ -3,12 +3,22 @@ import {RootState} from '../../store';
 
 const selectSelf = (state: RootState) => state;
 
-export const NewsListSelector = () =>
+export const PostsListSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
-    return state.news.newsList;
+    return state.news.postsList;
   });
 
-export const AllNewsListSelector = () =>
+export const PostsPaginationDetailsSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
-    return state.news.allNewsList;
+    return state.news.postsPaginationDetails;
+  });
+
+export const AllPostsListSelector = () =>
+  createDraftSafeSelector(selectSelf, state => {
+    return state.news.allPosts;
+  });
+
+export const VideoPlayerContentSelector = () =>
+  createDraftSafeSelector(selectSelf, state => {
+    return state.news.VideoPlayerContent;
   });

@@ -7,3 +7,8 @@ export const EventsListSelector = () =>
   createDraftSafeSelector(selectSelf, state => {
     return state.events.eventsList;
   });
+
+export const EventsPaginationDetailsSelector = () =>
+  createDraftSafeSelector(selectSelf, state => {
+    return state.events.eventsPaginationDetails;
+  });

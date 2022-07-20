@@ -8,8 +8,6 @@ import PushNotification, {Importance} from 'react-native-push-notification';
 import {Persistor, Store} from './src/store';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Container from './Container';
-import {Alert} from 'react-native';
-import Constants from './src/config/Constants';
 
 Icon.loadFont();
 

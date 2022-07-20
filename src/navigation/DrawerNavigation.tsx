@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Linking,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -20,12 +21,13 @@ import {
   DrawerNavigationSelector,
   fetchDashboardSettings,
   SelectedNavigationSelector,
+  setAppTheme,
   setSelectedNavigation,
   SettingsSelector,
+  ThemeSelector,
 } from '../store/Configuration';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {c, f, l, t} from '../styles/shared';
-import {DrawerNavigation as DrawerNavigationType} from '../types/responses/SettingResponseType';
 import Collapsible from 'react-native-collapsible';
 import NavigationService from '../services/NavigationService';
 import {usePrimaryStyles} from '../hooks/useThemeStyles';
@@ -34,25 +36,33 @@ import {resetCoursesList} from '../store/Course';
 import {fetchLogout, FetchLogoutPrefix, IsAuthSelector} from '../store/Auth';
 import {ScreenID} from './types';
 import TabsNavigation from './BottomTabsNavigation';
-import {resetNewsList} from '../store/News';
-import {resetEventsList} from '../store/Events';
 import {openLink} from '../components/Browser';
-import {ScrollView} from 'react-native-gesture-handler';
-import Input from '../components/FormControls/Input';
+
+import {NavigationType} from '../types/responses/NavigationsResponseType';
+import {Switch} from 'react-native-gesture-handler';
+import ToggleSwitch from 'toggle-switch-react-native';
+import {useContainerStyles} from '../styles/elements';
+import {useColors} from '../styles/shared/Colors';
+import Checkbox from '../components/FormControls/Checkbox';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = () => {
   const dispatch = useAppDispatch();
   const isAuth = useAppSelector(IsAuthSelector());
-  const drawernavigations = useAppSelector(DrawerNavigationSelector());
+  const drawernavigations = useAppSelector(
+    DrawerNavigationSelector(),
+  ) as NavigationType[];
   const selectedNavigation = useAppSelector(SelectedNavigationSelector());
   const settings = useAppSelector(SettingsSelector());
+  const appTheme = useAppSelector(ThemeSelector());
 
-  const logoPath = useAppSelector(state => {
-    return state.configuration.logo_color_ci?.logo_app_full_path;
-  });
+  const logoPath =
+    appTheme === 'dark'
+      ? settings?.main_logo_monochrome_url
+      : settings?.main_logo_url;
   const primaryColor = usePrimaryStyles().color;
+  const containerStyles = useContainerStyles();
 
   // refs
   const firstRender = useRef(true);
@@ -62,11 +72,11 @@ const DrawerNavigation = () => {
     useState(false);
   const [appSearchText, setAppSearchText] = useState('');
 
-  const handleNavigationPress = (drawernavigation: DrawerNavigationType) => {
+  const handleNavigationPress = (drawernavigation: NavigationType) => {
     NavigationService.closeDrawer();
-    if (drawernavigation.link_type === 'link') {
-      if (drawernavigation.full_url) {
-        openLink(drawernavigation.full_url);
+    if (drawernavigation.page_type === 'link') {
+      if (drawernavigation.link_url) {
+        openLink(drawernavigation.link_url);
       }
     } else {
       if (selectedNavigation?.id !== drawernavigation.id) {
@@ -117,17 +127,26 @@ const DrawerNavigation = () => {
   const goToProfile = () => {
     NavigationService.pushToScreen(ScreenID.Profile);
   };
+  const gotoSettings = () => {
+    NavigationService.pushToScreen(ScreenID.Settings);
+  };
 
   const onLogoutSuccess = useCallback(() => {
     NavigationService.closeDrawer();
     NavigationService.resetToScreen(ScreenID.Login);
   }, []);
 
+  const goToLawTextDetail = (id: number) => {
+    NavigationService.pushToScreen(ScreenID.LegalTextDetail, {
+      id,
+    });
+  };
+
   useThunkCallbackAction(FetchLogoutPrefix, onLogoutSuccess, onLogoutSuccess);
 
   const rendermenu = (
-    drawernavigation: DrawerNavigationType,
-    children: Array<DrawerNavigationType>,
+    drawernavigation: NavigationType,
+    children: Array<NavigationType>,
     index: number,
     isChildren?: boolean,
   ) => {
@@ -177,26 +196,29 @@ const DrawerNavigation = () => {
                       ...f.fontWeightMedium,
                     }
                   : {},
-                t.h5,
+                t.h5SM,
+                f.fontWeightMedium,
                 isChildren ? {...l.py10} : {},
               ]}>
               {drawernavigation.name}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[l.pl10]}
-            onPress={() => {
-              setExapndSelectednavigation(false);
-              const obj = {
-                ...collapsedConfig,
-                [drawernavigation.id]:
-                  // @ts-ignore
-                  !collapsedConfig[drawernavigation.id],
-              };
-              setCollapsedConfig(obj);
-            }}>
-            <Icon color={c.black400} name={'arrow-drop-down'} size={20} />
-          </TouchableOpacity>
+          {drawernavigation.children && drawernavigation.children.length > 0 && (
+            <TouchableOpacity
+              style={[l.pl10]}
+              onPress={() => {
+                setExapndSelectednavigation(false);
+                const obj = {
+                  ...collapsedConfig,
+                  [drawernavigation.id]:
+                    // @ts-ignore
+                    !collapsedConfig[drawernavigation.id],
+                };
+                setCollapsedConfig(obj);
+              }}>
+              <Icon color={c.black400} name={'arrow-drop-down'} size={20} />
+            </TouchableOpacity>
+          )}
         </View>
         <Collapsible collapsed={isCollapsed}>
           {renderListItems(children)}
@@ -205,12 +227,12 @@ const DrawerNavigation = () => {
     );
   };
 
-  const renderListItems = (items: Array<DrawerNavigationType>) => {
+  const renderListItems = (items: Array<NavigationType>) => {
     return (
-      <View>
+      <View style={[l.mt10, l.ml30]}>
         {items.map((item, i) => {
           return (
-            <View style={{...l.pt20, ...l.pl20}} key={i}>
+            <View style={[l.mt10, !item.children ? l.mb10 : null]} key={i}>
               {item.children ? (
                 <>{rendermenu(item, item.children, i, true)}</>
               ) : (
@@ -231,18 +253,39 @@ const DrawerNavigation = () => {
 
   const renderDrawerNavigations = () => {
     const win = Dimensions.get('window');
-    const ratio = win.width / 541; //541 is actual image width
+    const ratio = win.width / 400;
+    // const colors = useColors();
+
     return (
       <View style={{flex: 1}}>
-        <View style={{...l.px10, ...l.mt10, flexDirection: 'row'}}>
-          <FastImage
-            source={{uri: logoPath}}
-            style={{height: 100 * ratio, width: 250}}
-            resizeMode={FastImage.resizeMode.contain}
-          />
+        <View
+          style={[
+            l.px20,
+            l.my10,
+            l.pb10,
+            l.flexRow,
+            logoPath
+              ? {borderBottomWidth: 1, borderBottomColor: c.grey400}
+              : {},
+          ]}>
+          {logoPath ? (
+            <>
+              <FastImage
+                source={{uri: logoPath}}
+                style={{
+                  height: 80 * ratio,
+                  width: '100%',
+                  // borderWidth: 1,
+                  ...l.flexRow,
+                  ...l.justifyEnd,
+                }}
+                resizeMode={FastImage.resizeMode.contain}
+              />
+            </>
+          ) : null}
         </View>
 
-        <View style={[l.px10, l.py15]}>
+        {/* <View style={[l.px10, l.py15]}>
           <Input
             type={'search'}
             onClearSearch={() => {
@@ -266,7 +309,7 @@ const DrawerNavigation = () => {
               setAppSearchText('');
             }}
           />
-        </View>
+        </View> */}
 
         <View>
           {drawernavigations.map((drawernavigation, i) => {
@@ -288,7 +331,7 @@ const DrawerNavigation = () => {
   };
 
   const renderMenuItemText = (
-    drawernavigation: DrawerNavigationType,
+    drawernavigation: NavigationType,
     isChildren?: boolean,
   ) => {
     return (
@@ -304,8 +347,8 @@ const DrawerNavigation = () => {
                   ...f.fontWeightMedium,
                 }
               : {},
-            t.h5,
-            // isChildren ? {...l.py5} : {},
+            t.h5SM,
+            f.fontWeightMedium,
           ]}>
           {drawernavigation.name}
         </Text>
@@ -321,46 +364,100 @@ const DrawerNavigation = () => {
         swipeEnabled: true,
         unmountOnBlur: true,
       }}
+      drawerPosition={'right'}
       drawerContent={props => {
         return (
-          <SafeAreaView>
-            <ScrollView
-              bounces={false}
-              style={{
-                height: '100%',
-              }}
-              contentContainerStyle={{
-                flexGrow: 1,
-              }}>
-              <View style={{flex: 1}}>
-                {/* navigations */}
-                {renderDrawerNavigations()}
+          <View style={[containerStyles]}>
+            <SafeAreaView>
+              <ScrollView
+                bounces={false}
+                style={{
+                  height: '100%',
+                  // backgroundColor: 'blue',
+                }}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                  }}>
+                  {/* navigations */}
+                  {renderDrawerNavigations()}
 
-                <View>
-                  {/* Terms of use */}
+                  {/* legal texts */}
+                  <View style={{borderTopWidth: 1, borderTopColor: c.grey400}}>
+                    {/* Impressum */}
+                    {settings?.impression_id ? (
+                      <TouchableOpacity
+                        style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
+                        onPress={() => {
+                          NavigationService.closeDrawer();
+                          // @ts-ignore
+                          goToLawTextDetail(settings?.impression_id);
+                        }}>
+                        <Text style={[t.h5SM, f.fontWeightMedium]}>
+                          {settings?.impression_text}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+
+                    {/* Datenschutz */}
+                    {settings?.data_privacy_id ? (
+                      <TouchableOpacity
+                        style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
+                        onPress={() => {
+                          NavigationService.closeDrawer();
+                          // @ts-ignore
+                          goToLawTextDetail(settings?.data_privacy_id);
+                        }}>
+                        <Text style={[t.h5SM, f.fontWeightMedium]}>
+                          {settings?.data_privacy_text}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+
+                    {/* Terms of use */}
+                    {settings?.terms_of_use_id ? (
+                      <TouchableOpacity
+                        style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
+                        onPress={() => {
+                          NavigationService.closeDrawer();
+                          // @ts-ignore
+                          goToLawTextDetail(settings?.terms_of_use_id);
+                        }}>
+                        <Text style={[t.h5SM, f.fontWeightMedium]}>
+                          {settings?.terms_of_use_text}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+
+                  {/* Settings */}
                   <TouchableOpacity
-                    style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
+                    style={[l.flexRow, l.alignCtr, l.p20]}
                     onPress={() => {
-                      Linking.openURL('https://www.nlt.de/impressum/');
+                      NavigationService.closeDrawer();
+                      gotoSettings();
                     }}>
-                    <Text style={[t.h5]}>{'Impressum'}</Text>
+                    <Text style={[t.h5SM, f.fontWeightMedium]}>
+                      Einstellungen
+                    </Text>
+
+                    {/* <ToggleSwitch
+                      // @ts-ignore
+                      isOn={appTheme === 'dark'}
+                      onColor={primaryColor}
+                      offColor={c.grey50}
+                      size="medium"
+                      onToggle={isOn => {
+                        dispatch(setAppTheme(isOn ? 'dark' : 'light'));
+                      }}
+                    /> */}
                   </TouchableOpacity>
 
-                  {/* Privacy Policy */}
-                  <TouchableOpacity
-                    style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
-                    onPress={() => {
-                      Linking.openURL(
-                        'https://www.nlt.de/datenschutzerklaerung/',
-                      );
-                    }}>
-                    <Text style={[t.h5]}>{'Datenschutzbedingungen'}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {settings?.sign_in && (
+                  {/* {settings?.sign_in && (
                   <View>
-                    {/* Profile */}
                     {isAuth && (
                       <TouchableOpacity
                         style={[
@@ -379,8 +476,6 @@ const DrawerNavigation = () => {
                         />
                       </TouchableOpacity>
                     )}
-
-                    {/* register */}
                     {!isAuth && (
                       <TouchableOpacity
                         style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
@@ -393,8 +488,6 @@ const DrawerNavigation = () => {
                         />
                       </TouchableOpacity>
                     )}
-
-                    {/* signout */}
                     <TouchableOpacity
                       style={[l.flexRow, l.alignCtr, l.justifyBtw, l.p20]}
                       onPress={isAuth ? logoutUser : goToLogin}>
@@ -408,11 +501,12 @@ const DrawerNavigation = () => {
                       />
                     </TouchableOpacity>
                   </View>
-                )}
-                {/* default navogations */}
-              </View>
-            </ScrollView>
-          </SafeAreaView>
+                )} */}
+                  {/* default navogations */}
+                </View>
+              </ScrollView>
+            </SafeAreaView>
+          </View>
         );
       }}>
       <Drawer.Screen name="Dashboard" component={TabsNavigation} />
@@ -423,8 +517,6 @@ const DrawerNavigation = () => {
 const styles = StyleSheet.create({
   navigationItemContainer: {
     ...l.p20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#ccc',
   },
 });
 

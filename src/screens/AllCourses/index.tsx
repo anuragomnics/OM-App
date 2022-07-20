@@ -1,12 +1,11 @@
 import React, {FC} from 'react';
-import {View} from 'react-native';
+import {View, ScrollView} from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParams, ScreenID} from '../../navigation/types';
 // custom
 import Header from '../../components/Header';
 import Text from '../../components/Text';
 import CourseList from '../Dashboard/components/CourseList';
-import {ScrollView} from 'react-native-gesture-handler';
 import {l} from '../../styles/shared';
 import {ContainerStyles} from '../../styles/elements';
 

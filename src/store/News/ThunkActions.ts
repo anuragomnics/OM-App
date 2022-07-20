@@ -1,27 +1,28 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 // custom
 import {FetchNewsRequestParams} from '../../types/request';
-import NewsService from '../../services/NewsService';
+import NewsService from '../../services/PostsService';
 
 export const fetchNewsPrefix = '@News/fetchNews';
-export const fetchAllNewsPrefix = '@News/fetchAllNews';
+export const fetchPostsPrefix = '@News/fetchPosts';
+export const fetchAllPostsPrefix = '@News/fetchAllPosts';
 
-export const fetchNews = createAsyncThunk(
-  fetchNewsPrefix,
+export const fetchPosts = createAsyncThunk(
+  fetchPostsPrefix,
   async (params: FetchNewsRequestParams | undefined, {rejectWithValue}) => {
     try {
-      return await NewsService.fetchNews(params);
+      return await NewsService.fetchPosts(params);
     } catch (error) {
       return rejectWithValue(error?.response?.data);
     }
   },
 );
 
-export const fetchAllNews = createAsyncThunk(
-  fetchAllNewsPrefix,
+export const fetchAllPosts = createAsyncThunk(
+  fetchAllPostsPrefix,
   async (params: FetchNewsRequestParams | undefined, {rejectWithValue}) => {
     try {
-      return await NewsService.fetchNews(params);
+      return await NewsService.fetchPosts(params);
     } catch (error) {
       return rejectWithValue(error?.response?.data);
     }

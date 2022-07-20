@@ -151,10 +151,10 @@ const renderChapters = (
   isLoading: boolean,
 ) => {
   const goToCouseVideoPlayer = (chapter: ChapterType) => {
-    NavigationService.pushToScreen(ScreenID.CourseVideoPlayer, {
-      chapter,
-      allChapters: chapters,
-    });
+    // NavigationService.pushToScreen(ScreenID.VideoPlayer, {
+    //   chapter,
+    //   allChapters: chapters,
+    // });
   };
 
   return (

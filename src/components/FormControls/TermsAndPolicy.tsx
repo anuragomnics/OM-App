@@ -24,7 +24,7 @@ const TermsAndPolicy: FC<Props> = ({
   error,
 }) => {
   const goToLawTextDetail = () => {
-    NavigationService.pushToScreen(ScreenID.LawTextDetail, {content});
+    NavigationService.pushToScreen(ScreenID.LegalTextDetail, {content});
   };
 
   const hasError = touched && error;

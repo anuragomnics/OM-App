@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import Video from 'react-native-video';
 import {RouteProp} from '@react-navigation/native';
@@ -12,8 +13,6 @@ import {RouteProp} from '@react-navigation/native';
 import Slider from 'react-native-slider';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Orientation from 'react-native-orientation-locker';
-import RenderHTML from 'react-native-render-html';
-import AutoHeightWebView from 'react-native-autoheight-webview';
 
 // custom
 import Header from '../../components/Header';
@@ -21,19 +20,10 @@ import Text from '../../components/Text';
 import {c, f, l, t} from '../../styles/shared';
 import {usePrimaryStyles} from '../../hooks/useThemeStyles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {RootStackParams, ScreenID} from '../../navigation/types';
-import {ChapterType} from '../../types/responses/SingleCourseResponseType';
-
-import DeviceHelper from '../../config/DeviceHelper';
-import TabBar from '../../components/TabBar';
 import {ContainerStyles} from '../../styles/elements';
-import ChapterItem from '../../components/ChapterItem';
-import FastImage from 'react-native-fast-image';
-import {ScrollView} from 'react-native-gesture-handler';
-import moment from 'moment';
 
 interface Props {
-  route: RouteProp<RootStackParams, ScreenID.CourseVideoPlayer>;
+  mediaUrl: string;
 }
 
 const TABS = [
@@ -47,9 +37,9 @@ const TABS = [
   },
 ];
 
-const CourseVideoPlyer: FC<Props> = ({route}) => {
+const CourseVideoPlyer: FC<Props> = ({mediaUrl}) => {
   // @ts-ignore
-  const {chapter = {}, allChapters = []} = route.params;
+  // const {chapter = {}, allChapters = []} = route.params;
   const primaryColor = usePrimaryStyles().color;
 
   // state
@@ -57,7 +47,7 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
   const [fullscreenMode, setFullscreenMode] = useState(false);
   const [videoPaused, setVideoPaused] = useState(false);
   const [selectedTab, setSelectedTab] = useState(TABS[0]);
-  const [selectedChapter, setSelectedChapter] = useState<ChapterType>(chapter);
+  // const [selectedChapter, setSelectedChapter] = useState<ChapterType>(chapter);
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [isVideoSliding, setIsVideoSliding] = useState(false);
@@ -74,16 +64,16 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
   }, []);
 
   const toggleFullscreenMode = () => {
-    if (!fullscreenMode) {
-      Orientation.lockToLandscapeLeft();
-    } else {
-      Orientation.lockToPortrait();
-    }
+    // if (!fullscreenMode) {
+    //   Orientation.lockToLandscapeLeft();
+    // } else {
+    //   Orientation.lockToPortrait();
+    // }
     setFullscreenMode(!fullscreenMode);
   };
 
   return (
-    <View style={[ContainerStyles, {backgroundColor: '#fff'}]}>
+    <View style={[ContainerStyles, {backgroundColor: 'red'}]}>
       <StatusBar barStyle={'light-content'} backgroundColor={'#000'} />
       <View
         style={[
@@ -91,8 +81,8 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
             backgroundColor: '#000',
             position: 'relative',
             marginTop: useSafeAreaInsets().top,
+            borderWidth: 1,
           },
-          fullscreenMode ? {height: '100%'} : {},
         ]}>
         <View
           style={[fullscreenMode ? styles.fullscreenWrapper : styles.wrapper]}>
@@ -105,7 +95,7 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
               ref={videoPlayerRef}
               // source={require('../../assets/videos/sampleVideo2.mp4')}
               source={{
-                uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                uri: mediaUrl,
               }}
               onError={err => {
                 console.log('videoErrr', err);
@@ -114,8 +104,8 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
               resizeMode="stretch"
               controls={false}
               paused={videoPaused}
-              fullscreen={fullscreenMode}
-              fullscreenOrientation={'landscape'}
+              fullscreen={false}
+              // fullscreenOrientation={'landscape'}
               onReadyForDisplay={() => {
                 setIsVideoLoading(false);
               }}
@@ -217,57 +207,11 @@ const CourseVideoPlyer: FC<Props> = ({route}) => {
         </View>
       </View>
 
-      {/* Title */}
-      <View style={[l.p20]}>
-        <Text style={[t.h4, f.fontWeightMedium, {lineHeight: 22}]}>
-          {chapter.title}
-        </Text>
-      </View>
-
-      <Text>{currentVideoTime}</Text>
-      {/* 
-      
-      <Text>{currVideoTotalDuration}</Text> */}
-
-      {/* tab bar */}
-      <TabBar
-        tabs={TABS}
-        onSelectTab={tab => {
-          setSelectedTab(tab);
-        }}
-      />
-
       {/* content */}
       <ScrollView
         contentContainerStyle={[l.p20]}
         bounces={false}
-        showsVerticalScrollIndicator={false}>
-        {/* description */}
-        {selectedTab.id === 0 && (
-          <RenderHTML
-            source={{html: selectedChapter.description}}
-            contentWidth={DeviceHelper.width - 40}
-          />
-        )}
-        {/* all chapters */}
-        {selectedTab.id === 1 && (
-          <View style={[l.mt10]}>
-            {allChapters.map((chapter: ChapterType, index: number) => {
-              return (
-                <View key={index}>
-                  <ChapterItem
-                    item={chapter}
-                    isPlaying={selectedChapter.id === chapter.id}
-                  />
-                  {index !== allChapters.length - 1 ? (
-                    <View style={styles.chaptersDivider} />
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </ScrollView>
+        showsVerticalScrollIndicator={false}></ScrollView>
     </View>
   );
 };
@@ -276,7 +220,7 @@ const styles = StyleSheet.create({
   fullscreenWrapper: {
     height: '100%',
     width: '100%',
-    position: 'absolute',
+    // position: 'absolute',
   },
   wrapper: {
     height: 250,
@@ -311,7 +255,7 @@ const styles = StyleSheet.create({
   videoControlsWrapper: {
     ...l.fullWidth,
     height: '100%',
-    ...l.p20,
+    ...l.p10,
     ...l.justifyBtw,
   },
   slider: {

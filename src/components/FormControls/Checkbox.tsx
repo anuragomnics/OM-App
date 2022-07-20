@@ -1,6 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import {View, StyleSheet} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 // styles
 import {c, t, f, l} from '../../styles/shared';
@@ -10,29 +9,26 @@ import Text from '../Text';
 
 interface Props {
   onValueChange: (value: boolean) => void;
+  checked?: boolean;
 }
 
-const Checkbox: FC<Props> = ({onValueChange}) => {
-  const [value, setvalue] = useState<boolean>(false);
+const Checkbox: FC<Props> = ({onValueChange, checked}) => {
   const {viewStyle} = usePrimaryStyles();
-
-  useEffect(() => {
-    onValueChange?.(value);
-  }, [value]);
 
   return (
     <TouchableOpacity
       onPress={() => {
-        setvalue(!value);
+        // setvalue(!value);
+        onValueChange?.(!checked);
       }}
       style={[
         styles.container,
         {borderColor: usePrimaryStyles().color},
-        value
+        checked
           ? {...styles.checkboxActive, ...viewStyle}
           : styles.checkboxInactive,
       ]}>
-      <Icon color={c.white} size={16} name={'done'} />
+      {checked ? <Icon color={c.white} size={16} name={'done'} /> : null}
     </TouchableOpacity>
   );
 };

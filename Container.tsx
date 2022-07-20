@@ -2,9 +2,10 @@ import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
-import {StatusBar, View} from 'react-native';
+import {Appearance, StatusBar, View} from 'react-native';
 import RNBootSplash from 'react-native-bootsplash';
 import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
+import 'moment/min/locales';
 
 // custom
 import {Store} from './src/store/index';
@@ -18,9 +19,14 @@ import {
 } from './src/hooks/useRedux';
 import {
   fetchAppSettings,
+  fetchAppSettingsNew,
   FetchAppSettingsPrefix,
   fetchCheckoutSettings,
+  fetchAppNavigations,
   LoadAppFontsPrefix,
+  ThemeSelector,
+  setAppTheme,
+  ThemeSetttingTypeSelector,
 } from './src/store/Configuration';
 import {StatusSelector} from './src/store/Status';
 import {
@@ -34,6 +40,10 @@ import {PaymentService} from './src/services/PaymentService';
 import {c, f, l} from './src/styles/shared';
 import {fetchGetMasterData} from './src/store/MasterData';
 import AppNotification from './src/notifications/AppNotification';
+import VideoPlayer from './src/components/VideoPlayerModal';
+import {VideoPlayerContentSelector} from './src/store/News';
+import {useContainerStyles} from './src/styles/elements';
+import moment from 'moment';
 
 Icon.loadFont();
 
@@ -41,6 +51,10 @@ const Container = () => {
   const dispatch = useAppDispatch();
   const {error, pending} = useAppSelector(StatusSelector(LoadAppFontsPrefix));
   const isAuth = useAppSelector(IsAuthSelector());
+  const VideoPlayerContent = useAppSelector(VideoPlayerContentSelector());
+  const appTheme = useAppSelector(ThemeSelector());
+  const containerStyles = useContainerStyles();
+  const appThemSettingType = useAppSelector(ThemeSetttingTypeSelector());
   // useInitIAP();
 
   // refs
@@ -54,12 +68,29 @@ const Container = () => {
   const [isErrorFont, setErrorFont] = useState(false);
   const [isErrorNewDevice, setErrorNewDevice] = useState(false);
 
+  const updateAppTheme = (theme: string) => {
+    if (theme === 'dark') {
+      dispatch(setAppTheme('dark'));
+    } else {
+      dispatch(setAppTheme('light'));
+    }
+  };
+
   useEffect(() => {
-    dispatch(fetchAppSettings());
-    dispatch(fetchCheckoutSettings());
-    dispatch(fetchGetMasterData());
+    if (appThemSettingType === 'system') {
+      updateAppTheme(Appearance.getColorScheme() || 'light');
+    }
+
+    dispatch(fetchAppSettingsNew());
+    dispatch(fetchAppNavigations());
+
+    moment.locale('de');
+
+    // dispatch(fetchAppSettings());
+    // dispatch(fetchCheckoutSettings());
+    // dispatch(fetchGetMasterData());
     {
-      !isAuth && dispatch(fetchRegisterNewDevice());
+      // !isAuth && dispatch(fetchRegisterNewDevice());
     }
   }, []);
 
@@ -169,21 +200,23 @@ const Container = () => {
   return (
     <Provider store={Store}>
       <SafeAreaProvider>
-        <AppFonts onError={onLoadFontError} onSuccess={onLoadFontSuccess} />
-        <StatusBar
-          translucent={true}
-          backgroundColor="transparent"
-          barStyle={'dark-content'}
-        />
-        {!isLoading && (
-          <ActionSheetProvider>
-            <>
-              <AppNotification />
-              <AppNavigation />
-              <Toast config={toastConfig} ref={ref => Toast.setRef(ref)} />
-            </>
-          </ActionSheetProvider>
-        )}
+        <View style={[containerStyles]}>
+          <AppFonts onError={onLoadFontError} onSuccess={onLoadFontSuccess} />
+          <StatusBar
+            translucent={true}
+            backgroundColor="transparent"
+            barStyle={appTheme === 'dark' ? 'light-content' : 'dark-content'}
+          />
+          {!isLoading && (
+            <ActionSheetProvider>
+              <>
+                {VideoPlayerContent ? <VideoPlayer /> : null}
+                <AppNavigation />
+                <Toast config={toastConfig} ref={ref => Toast.setRef(ref)} />
+              </>
+            </ActionSheetProvider>
+          )}
+        </View>
       </SafeAreaProvider>
     </Provider>
   );

@@ -1,9 +1,28 @@
-import {StyleSheet} from 'react-native';
+import {Alert, StyleSheet} from 'react-native';
+import {useAppSelector} from '../../hooks/useRedux';
+import {ThemeSelector} from '../../store/Configuration';
 import {c, f, l, t} from '../shared';
 
+export const useContainerStyles = () => {
+  const theme = useAppSelector(ThemeSelector());
+
+  if (theme === 'dark') {
+    return {
+      backgroundColor: '#121212',
+      // backgroundColor: '#f3f5f9',
+      flex: 1,
+    };
+  }
+  return {
+    backgroundColor: c.white,
+    // backgroundColor: '#f3f5f9',
+    flex: 1,
+  };
+};
+
 export const ContainerStyles = {
-  // backgroundColor: c.grey50,
-  backgroundColor: '#f3f5f9',
+  backgroundColor: c.white,
+  // backgroundColor: '#f3f5f9',
   flex: 1,
 };
 

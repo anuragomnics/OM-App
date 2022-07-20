@@ -5,6 +5,7 @@ import {PaymentService} from '../../services/PaymentService';
 import {LoadAppFontsParams} from '../../types/request';
 
 export const FetchAppSettingsPrefix = '@Configuration/fetchAppSettings';
+export const FetchAppNavigationsPrefix = '@Configuration/fetchAppNavigations';
 export const LoadAppFontsPrefix = '@Configuration/LoadAppFonts';
 export const FetchDashboardSettingsPrefix =
   '@Configuration/fetchDashboardSettings';
@@ -16,6 +17,28 @@ export const fetchAppSettings = createAsyncThunk(
   async (_, {rejectWithValue}) => {
     try {
       return await ConfigurationService.fetchAppSettings();
+    } catch (error) {
+      return rejectWithValue(error?.response?.data);
+    }
+  },
+);
+
+export const fetchAppSettingsNew = createAsyncThunk(
+  FetchAppSettingsPrefix,
+  async (_, {rejectWithValue}) => {
+    try {
+      return await ConfigurationService.fetchAppSettingsNew();
+    } catch (error) {
+      return rejectWithValue(error?.response?.data);
+    }
+  },
+);
+
+export const fetchAppNavigations = createAsyncThunk(
+  FetchAppNavigationsPrefix,
+  async (_, {rejectWithValue}) => {
+    try {
+      return await ConfigurationService.fetchAppNavigations();
     } catch (error) {
       return rejectWithValue(error?.response?.data);
     }

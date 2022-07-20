@@ -1,11 +1,50 @@
 export interface SettingResponseType {
-  data: SettingType;
+  generalDetails: SettingTypeNew;
+  message: string;
 }
 
 export interface DashboardSettingResponseType {
-  data: Array<
-    StaticSlider | CourseSlider | CourseListSettings | NewsNavigationBarType
+  pageSettingsDetails: PageSettingsDetailsType;
+}
+export interface PageSettingsDetailsType {
+  id: number;
+  parents_id: number | null;
+  name: string;
+  sections: Array<
+    | BannerSectionType
+    | PostsListSectionType
+    | NewsLetterSectionType
+    | EventsListSectionType
   >;
+}
+
+export interface SettingTypeNew {
+  font: string;
+  accent_color: string;
+  accent_text_color: string;
+  accent_color_dark_mode: string;
+  accent_text_color_dark_mode: string;
+  success_alert: string;
+  warning_alert: string;
+  error_alert: string;
+  splash_screen_url: string | null;
+  main_logo_url: string | null;
+  main_logo_monochrome_url: string | null;
+  impression: 0 | 1;
+  impression_text: string;
+  impression_id: number | null;
+  data_privacy: 0 | 1;
+  data_privacy_text: string;
+  data_privacy_id: number | null;
+  terms_of_use: 0 | 1;
+  terms_of_use_text: string;
+  terms_of_use_id: number | null;
+  posts_general_settings: postsGeneralSettingsType;
+}
+
+export interface postsGeneralSettingsType {
+  posts_details_date_time_format: 'none' | 'date' | 'date_time';
+  posts_details_display_style: 'style-1' | 'style-2';
 }
 
 export interface SettingType {
@@ -65,29 +104,107 @@ export interface EventsListSettings {
   list_background_color_code: string;
 }
 
-export interface StaticSlider {
+export interface BannerSectionType {
+  id: number;
   type: string;
-  background_type: string;
-  background_image?: string;
-  background_color?: string;
+  background_type: 'image' | 'color';
+  background_image_url: string | null;
+  background_color: string;
   title: string;
-  title_size_medium: string;
-  title_size_large: string;
+  title_size_small: number;
+  title_size_medium: number;
+  title_size_large: number;
   title_text_color: string;
   title_layer_color: string;
-  title_layer_transparency: string;
-  subtitle?: string;
-  subtitle_size_small: string;
-  subtitle_size_big: string;
-  subtitle_text_color: string;
-  subtitle_layer_color: string;
-  subtitle_layer_transparency: string;
-  destination_button_status?: string;
-  destination_button_link_page?: {
-    id: number;
-    type: string;
-    name: string;
-  };
+  title_layer_transparency: number;
+  sub_title: string;
+  sub_title_size_small: number;
+  sub_title_size_medium: number;
+  sub_title_size_large: number;
+  sub_title_text_color: string;
+  sub_title_layer_color: string;
+  sub_title_layer_transparency: number;
+  destination_button: 0 | 1;
+  destination_id: number | null;
+  destination_url: string | null;
+}
+
+export interface NewsLetterSectionType {
+  id: number;
+  type: 'NewsLetter';
+  background_type: 'image' | 'color';
+  background_image_id: number | null;
+  background_color: string;
+  title: string;
+  title_size_small: number;
+  title_size_medium: number;
+  title_size_large: number;
+  title_text_color: string;
+  title_layer_color: string;
+  title_layer_transparency: number;
+  legal_text_id: number | null;
+  extra_enable: 0 | 1;
+  extra_required: 0 | 1;
+}
+
+export interface PostsListSectionType {
+  id: number;
+  type: 'post-list';
+  title: string;
+  default_view: string;
+  switch_between_views: 0 | 1;
+  pagination: 0 | 1;
+  items_per_page: number | null;
+  sorting: string;
+  search_bar: 0 | 1;
+  offset: number | null;
+  option_for_featured: string;
+  rule_type: string;
+  groups: string;
+  groups_condition: string;
+  categories: string;
+  categories_condition: string;
+  tags: string;
+  tags_condition: string;
+}
+
+export interface EventsListSectionType {
+  id: number;
+  type: 'event-list';
+  title: string;
+  default_view: string;
+  switch_between_views: 0 | 1;
+  pagination: 0 | 1;
+  items_per_page: number | null;
+  search_bar: 0 | 1;
+  offset: number | null;
+  option_for_featured: string;
+  rule_type: string;
+  groups: string;
+  groups_condition: string;
+  categories: string;
+  categories_condition: string;
+  tags: string;
+  tags_condition: string;
+  sorting: string;
+}
+
+export interface PostsCarouselSectionType {
+  id: number;
+  type: 'post-carousel';
+  title: string;
+  offset: number | null;
+  option_for_featured: string;
+  total_items: number;
+  sorting: string;
+  maximum_items_per_carousel: string;
+  rule_type: string;
+  groups: string;
+  groups_condition: string;
+  categories: string;
+  categories_condition: string;
+  tags: string;
+  tags_condition: string;
 }
 
 export interface CourseSlider {
