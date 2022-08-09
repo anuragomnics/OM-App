@@ -12,11 +12,14 @@ import {
   TouchableOpacity,
   Image,
   PermissionsAndroid,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import RenderHtml from 'react-native-render-html';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as AddCalendarEvent from 'react-native-add-calendar-event';
+import LinearGradient from 'react-native-linear-gradient';
 
 // images
 import BackIcon from '../../../assets/images/back.png';
@@ -130,6 +133,9 @@ const EventDetailsStyle1: FC<Props> = ({event}) => {
 
   // refs
   const scrollRef = useRef();
+
+  // state
+  const [showFadeAnimate, setShowFadeAnimate] = useState(false);
 
   const renderMap = (location: Location) => {
     return `
@@ -258,6 +264,25 @@ const EventDetailsStyle1: FC<Props> = ({event}) => {
     }
   };
 
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    console.log('eeeee', e?.nativeEvent);
+    if (e?.nativeEvent?.contentOffset.y <= 10) {
+      setShowFadeAnimate(false);
+    }
+    //  else {
+    //   setShowFadeAnimate(true);
+    // }
+  };
+
+  const isSameDay = (date1: string, date2: string) => {
+    return moment(date1).isSame(moment(date2), 'date');
+  };
+
+  const linearGradientColors =
+    appTheme === 'dark'
+      ? ['rgba(18, 18, 18, 0)', 'rgba(18, 18, 18, 0.7)']
+      : ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.7)'];
+
   return (
     <View style={[ContainerStyles]}>
       {/* <Header useBack title={' '} /> */}
@@ -282,28 +307,56 @@ const EventDetailsStyle1: FC<Props> = ({event}) => {
             style={styles.backIcon}
           />
         </TouchableOpacity>
-        <ImageBackground
-          style={[
-            styles.bannerImg,
-            true ? {borderRadius: 0, height: 280} : {borderRadius: 10},
-          ]}
-          // @ts-ignore
-          source={{uri: event?.event_image_url}}></ImageBackground>
+        <TouchableOpacity
+          onPress={() => {
+            event?.event_image_url &&
+              NavigationService.pushToScreen(ScreenID.FullScreenImage, {
+                imageUrl: event?.event_image_url,
+              });
+          }}>
+          <ImageBackground
+            style={[
+              styles.bannerImg,
+              true ? {borderRadius: 0, height: 280} : {borderRadius: 10},
+            ]}
+            // @ts-ignore
+            source={{uri: event?.event_image_url}}></ImageBackground>
+        </TouchableOpacity>
       </View>
+
+      {showFadeAnimate && (
+        <LinearGradient
+          colors={linearGradientColors}
+          style={{
+            height: 90,
+            marginTop: 280,
+            width: '100%',
+            position: 'absolute',
+            zIndex: 999,
+            transform: [{rotate: '180deg'}],
+          }}></LinearGradient>
+      )}
 
       <ScrollView
         bounces={false}
         showsVerticalScrollIndicator={false}
         style={{
-          // marginTop: -20,
           backgroundColor: ContainerStyles.backgroundColor,
-          // borderRadius: 30,
-          // marginBottom: useSafeAreaInsets().bottom,
           ...l.p20,
         }}
         contentContainerStyle={[l.pb30]}
         // @ts-ignore
-        ref={scrollRef}>
+        ref={scrollRef}
+        onScrollBeginDrag={e => {
+          // handleScroll(e);
+          setShowFadeAnimate(true);
+        }}
+        onScrollEndDrag={e => {
+          handleScroll(e);
+        }}
+        onMomentumScrollEnd={e => {
+          handleScroll(e);
+        }}>
         {/* event tag */}
 
         <View style={[l.flexRow]}>
@@ -329,54 +382,97 @@ const EventDetailsStyle1: FC<Props> = ({event}) => {
           </Text>
         </View>
 
-        {/* date */}
         {event.start_date ? (
-          <View style={[l.flexRow, l.alignCtr, l.mt15]}>
-            {/* start date */}
-            <View style={[l.flexRow, l.alignCtr]}>
-              <Icon name={'event'} size={20} color={colors.black150} />
-              <Text
-                style={[
-                  l.ml5,
-                  t.h5,
-                  // f.fontWeightMedium,
-                  {color: colors.black200},
-                ]}>
-                {moment(event.start_date).format('DD.MM.YYYY')}
-                {' | '}
-                {moment(event.start_date).format('HH:mm')}
-              </Text>
-            </View>
+          <>
+            {isSameDay(event.start_date, event.end_date) ? (
+              <>
+                <View style={[l.flexRow, l.alignCtr, l.mt15]}>
+                  {/* start date */}
+                  <View style={[l.flexRow, l.alignCtr]}>
+                    <Icon name={'event'} size={20} color={colors.black150} />
+                    <Text
+                      style={[
+                        l.ml5,
+                        t.h5,
+                        // f.fontWeightMedium,
+                        {color: colors.black200},
+                      ]}>
+                      {moment(event.start_date).format('DD.MM.YYYY')}
+                      {/* {' | '}
+                      {moment(event.start_date).format('HH:mm')} */}
+                    </Text>
+                  </View>
 
-            {/* time */}
-            {event.end_date ? (
-              <View style={[l.flexRow, l.alignCtr, l.ml30]}>
-                <Icon name={'schedule'} size={20} color={colors.black150} />
-                <Text
-                  style={[
-                    l.ml5,
-                    t.h5,
-                    // f.fontWeightMedium,
-                    {color: colors.black200},
-                  ]}>
-                  {moment(event.end_date).from(moment(event.start_date), true)}
-                </Text>
-              </View>
-            ) : null}
+                  {/* time */}
+                  <View style={[l.flexRow, l.alignCtr, l.ml25]}>
+                    <Icon name={'schedule'} size={20} color={colors.black200} />
+                    <Text
+                      style={[
+                        l.ml5,
+                        t.h5,
+                        // f.fontWeightMedium,
+                        {color: colors.black200},
+                      ]}>
+                      {moment(event.start_date).format('HH:mm')}
+                      {event.end_date && (
+                        <>
+                          {' - '}
+                          {moment(event.end_date).format('HH:mm')}
+                        </>
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={[l.flexRow, l.alignCtr, l.mt15]}>
+                  {/* start date */}
+                  <View style={[l.flexRow, l.alignCtr]}>
+                    <Icon name={'event'} size={20} color={colors.black150} />
+                    <Text
+                      style={[
+                        l.ml5,
+                        t.h5,
+                        // f.fontWeightMedium,
+                        {color: colors.black200},
+                      ]}>
+                      {moment(event.start_date).format('DD.MM.YYYY')}
+                      {' | '}
+                      {moment(event.start_date).format('HH:mm')}
+                    </Text>
+                  </View>
 
-            {/* duration */}
-            {/* <View style={[l.flexRow, l.alignCtr]}>
-            <Icon name={'schedule'} size={20} color={colors.grey200} />
-            <Text>{moment(event.start_date).format('HH:mm')}</Text>
-          </View> */}
-          </View>
+                  {/* end date */}
+                  {event.end_date ? (
+                    <>
+                      <View style={[l.flexRow, l.alignCtr]}>
+                        <Text>{'  — '}</Text>
+                        <Text
+                          style={[
+                            l.ml5,
+                            t.h5,
+                            // f.fontWeightMedium,
+                            {color: colors.black200},
+                          ]}>
+                          {moment(event.end_date).format('DD.MM.YYYY')}
+                          {' | '}
+                          {moment(event.end_date).format('HH:mm')}
+                        </Text>
+                      </View>
+                    </>
+                  ) : null}
+                </View>
+              </>
+            )}
+          </>
         ) : null}
 
         {/* if:online meeting URL */}
         {event.event_type_name === 'Online' && eventDetails?.meeting_url ? (
           <View style={[l.mt20]}>
             <Text style={[t.h5, f.fontWeightMedium, l.mb10]}>
-              {'Meeting-URL'}
+              {'Teilnahme-Link'}
             </Text>
             <Text style={[t.h5SM, {color: colors.black200}]}>
               {eventDetails?.meeting_url}

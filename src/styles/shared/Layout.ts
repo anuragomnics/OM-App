@@ -128,6 +128,7 @@ export const layout = {
   py20: {paddingVertical: 20},
 
   m30: {margin: 30},
+  ml25: {marginLeft: 25},
   ml30: {marginLeft: 30},
   mr30: {marginRight: 30},
   mt30: {marginTop: 30},

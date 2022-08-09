@@ -207,20 +207,6 @@ const PostDetailsStyle1: FC<Props> = ({post}) => {
           }}></LinearGradient>
       )}
 
-      {/* {showFadeAnimate && (
-        <Image
-          source={BottomFade}
-          style={{
-            height: 100,
-            marginTop: 280,
-            width: '100%',
-            position: 'absolute',
-            zIndex: 999,
-            transform: [{rotate: '180deg'}],
-          }}
-        />
-      )} */}
-
       <ScrollView
         bounces={false}
         showsVerticalScrollIndicator={false}

@@ -1,6 +1,5 @@
 import {CommonActions, DrawerActions} from '@react-navigation/native';
 import {NavigationState, StackActions} from '@react-navigation/routers';
-import {InAppBrowser} from 'react-native-inappbrowser-reborn';
 import {Linking} from 'react-native';
 import {Store} from '../store';
 
@@ -97,24 +96,5 @@ export default class NavigationService {
   static toggleDrawer = () => {
     NavigationService.navigator &&
       NavigationService.navigator.dispatch(DrawerActions.toggleDrawer());
-  };
-
-  static openLink = async (url: string, delaySecond?: number | undefined) => {
-    try {
-      if (delaySecond) {
-        await delay(delaySecond);
-      }
-      const color = Store.getState().configuration.logo_color_ci?.color_accent;
-      if (await InAppBrowser.isAvailable()) {
-        await InAppBrowser.open(url, {
-          preferredBarTintColor: color,
-          toolbarColor: color,
-        });
-      } else {
-        await Linking.openURL(url);
-      }
-    } catch (error) {
-      console.error(error);
-    }
   };
 }

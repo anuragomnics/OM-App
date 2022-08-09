@@ -211,6 +211,7 @@ const Container = () => {
             <ActionSheetProvider>
               <>
                 {VideoPlayerContent ? <VideoPlayer /> : null}
+                <AppNotification />
                 <AppNavigation />
                 <Toast config={toastConfig} ref={ref => Toast.setRef(ref)} />
               </>

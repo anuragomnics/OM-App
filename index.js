@@ -60,5 +60,8 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   // do something
 });
 
+// subscribe to topic
+// messaging().subscribeToTopic('NLTAllNotifications');
+
 AppRegistry.registerComponent(appName, () => App);
 TrackPlayer.registerPlaybackService(() => require('./service'));

@@ -74,7 +74,8 @@ const MyTabBar: FC<MyTabBarProps> = ({tabNavigations}) => {
   const fetchDashboardSettingsAPI = (navigation: NavigationType) => {
     if (navigation.page_type === 'link') {
       if (navigation.link_url) {
-        openLink(navigation.link_url);
+        Linking.openURL(navigation.link_url);
+        // openLink(navigation.link_url);
       }
     } else {
       dispatch(fetchDashboardSettings(navigation.id));

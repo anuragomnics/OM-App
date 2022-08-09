@@ -76,7 +76,8 @@ const DrawerNavigation = () => {
     NavigationService.closeDrawer();
     if (drawernavigation.page_type === 'link') {
       if (drawernavigation.link_url) {
-        openLink(drawernavigation.link_url);
+        Linking.openURL(drawernavigation.link_url);
+        // openLink(drawernavigation.link_url);
       }
     } else {
       if (selectedNavigation?.id !== drawernavigation.id) {
